@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电子木鱼 · 功德无量</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  :root {
+    --bg-dark: #0a0806;
+    --bg-warm: #1c140e;
+    --lacquer-dark: #5c1a08;
+    --lacquer-mid: #8b2e12;
+    --lacquer-light: #c45a28;
+    --lacquer-highlight: #e8875a;
+    --gold: #d4a847;
+    --gold-bright: #f0c860;
+    --gold-soft: rgba(212, 168, 71, 0.6);
+    --text-main: #f0e0c8;
+    --text-dim: #8a7a60;
+    --text-faint: #5a5040;
+    --bg-body: var(--bg-dark);
+    --bg-glow-1: rgba(180, 120, 60, 0.08);
+    --bg-glow-2: rgba(200, 90, 40, 0.06);
+    --bg-glow-3: rgba(90, 50, 20, 0.15);
+    --particle-color: rgba(212, 168, 71, 0.15);
+    --btn-bg: rgba(255, 255, 255, 0.04);
+    --btn-border: rgba(255, 255, 255, 0.07);
+    --btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --dialog-bg: linear-gradient(145deg, #221a12, #1a120c);
+    --dialog-input-bg: rgba(255,255,255,0.05);
+    --dialog-input-border: rgba(255,255,255,0.1);
+  }
+
+  /* Light mode overrides */
+  body.light-mode {
+    --bg-body: #f0ebe3;
+    --bg-glow-1: rgba(200, 160, 100, 0.12);
+    --bg-glow-2: rgba(180, 120, 60, 0.08);
+    --bg-glow-3: rgba(120, 80, 40, 0.06);
+    --text-main: #3a2810;
+    --text-dim: #8a7a5a;
+    --text-faint: #b0a890;
+    --gold: #b8902a;
+    --gold-bright: #d4a838;
+    --particle-color: rgba(180, 140, 60, 0.2);
+    --btn-bg: rgba(0, 0, 0, 0.04);
+    --btn-border: rgba(0, 0, 0, 0.08);
+    --btn-hover-bg: rgba(0, 0, 0, 0.06);
+    --dialog-bg: linear-gradient(145deg, #ffffff, #f5f0e8);
+    --dialog-input-bg: rgba(0,0,0,0.03);
+    --dialog-input-border: rgba(0,0,0,0.1);
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-body);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Ambient background glow */
+  .bg-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 50% 40% at 50% 30%, var(--bg-glow-1) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 25% at 50% 55%, var(--bg-glow-2) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 110%, var(--bg-glow-3) 0%, transparent 50%);
+  }
+
+  /* Subtle noise texture overlay */
+  .bg-texture {
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* Floating particles */
+  .ambient-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--particle-color);
+    pointer-events: none;
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-100vh) translateX(var(--drift, 30px)); opacity: 0; }
+  }
+
+  /* ===== Header ===== */
+  .header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 36px 20px 0;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .header-title {
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.8em;
+    color: var(--text-faint);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .merit-display {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .merit-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.4em;
+    font-weight: 300;
+  }
+
+  .merit-count {
+    font-size: 3.8rem;
+    font-weight: 600;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+    transition: transform 0.12s ease;
+    text-shadow: 0 0 40px rgba(212, 168, 71, 0.25);
+  }
+
+  .merit-count.bump {
+    transform: scale(1.06);
+  }
+
+  /* ===== Fish Area ===== */
+  .fish-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+  }
+
+  .fish-aura {
+    position: absolute;
+    width: 560px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 168, 71, 0.06) 0%, transparent 65%);
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .fish-container.hit .fish-aura {
+    background: radial-gradient(circle, rgba(240, 200, 96, 0.15) 0%, transparent 65%);
+    transform: scale(1.1);
+  }
+
+  .wooden-fish {
+    width: 420px;
+    height: 295px;
+    position: relative;
+    transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.7));
+  }
+
+  body.light-mode .wooden-fish {
+    filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.2));
+  }
+
+  body.light-mode .ground-shadow {
+    fill: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Mallet swing animation */
+  .mallet {
+    transform-origin: 900px 615px;
+    transform: rotate(0deg);
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fish-container.hit .mallet {
+    transform: rotate(-30deg);
+  }
+
+  /* Fish squash on hit */
+  .fish-body-wrap {
+    transform-origin: 550px 540px;
+    transition: transform 0.1s ease-out;
+  }
+
+  .fish-container.hit .fish-body-wrap {
+    transform: scaleY(0.94) scaleX(1.04);
+  }
+
+  /* Slit pulse animation */
+  .slit-opening {
+    transform-origin: center;
+    transform: scaleY(1);
+    transition: transform 0.12s ease-out;
+  }
+
+  .fish-container.hit .slit-opening {
+    transform: scaleY(1.3);
+  }
+
+  .fish-container.hit .wooden-fish {
+    transform: scale(1.06);
+  }
+
+  /* Ripple */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(212, 168, 71, 0.35);
+    pointer-events: none;
+    animation: rippleExpand 0.9s ease-out forwards;
+  }
+
+  @keyframes rippleExpand {
+    0% { width: 220px; height: 220px; opacity: 0.5; }
+    100% { width: 580px; height: 580px; opacity: 0; }
+  }
+
+  /* Floating merit text */
+  .merit-text {
+    position: absolute;
+    font-size: 1.4rem;
+    font-weight: 700;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: floatMerit 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    z-index: 20;
+    letter-spacing: 0.05em;
+  }
+
+  @keyframes floatMerit {
+    0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+    12% { transform: translate(-50%, -8px) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.95); opacity: 0; }
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 20px 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    z-index: 10;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .hint kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.7rem;
+    color: var(--text-main);
+    font-family: inherit;
+  }
+
+  .hint .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-faint);
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Auto knock dialog - interval options */
+  .auto-interval-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .interval-option {
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .interval-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+  }
+
+  .interval-option.selected {
+    background: rgba(212, 168, 71, 0.15);
+    border-color: rgba(212, 168, 71, 0.4);
+    color: var(--gold);
+  }
+
+  .btn.active {
+    background: rgba(212, 168, 71, 0.12);
+    color: var(--gold);
+    border-color: rgba(212, 168, 71, 0.3);
+  }
+
+  .btn {
+    padding: 7px 18px;
+    border-radius: 100px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+    letter-spacing: 0.12em;
+  }
+
+  .btn:hover {
+    background: var(--btn-hover-bg);
+    color: var(--text-main);
+    border-color: rgba(212, 168, 71, 0.2);
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--dialog-bg);
+    border: 1px solid rgba(212, 168, 71, 0.15);
+    color: var(--text-main);
+    padding: 9px 22px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    z-index: 100;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(12px);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .wooden-fish { width: 320px; height: 225px; }
+    .fish-aura { width: 350px; height: 270px; }
+    .merit-count { font-size: 3rem; }
+  }
+
+  /* ===== Confirm Dialog ===== */
+  .dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .dialog-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .dialog {
+    background: var(--dialog-bg);
+    border: 1px solid rgba(212, 168, 71, 0.15);
+    border-radius: 16px;
+    padding: 32px 36px 28px;
+    max-width: 340px;
+    width: 85%;
+    text-align: center;
+    transform: scale(0.9) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 168, 71, 0.05);
+  }
+
+  .dialog-overlay.show .dialog {
+    transform: scale(1) translateY(0);
+  }
+
+  .dialog-icon {
+    font-size: 2rem;
+    margin-bottom: 14px;
+    line-height: 1;
+  }
+
+  .dialog-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 8px;
+  }
+
+  .dialog-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .dialog-btn {
+    padding: 9px 28px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.08em;
+    border: none;
+  }
+
+  .dialog-btn-cancel {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .dialog-btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+  }
+
+  .dialog-btn-confirm {
+    background: linear-gradient(135deg, #c45a28, #8b2e12);
+    color: #f0e0c8;
+    border: 1px solid rgba(200, 90, 40, 0.3);
+  }
+
+  .dialog-btn-confirm:hover {
+    background: linear-gradient(135deg, #d46838, #9a3a18);
+    box-shadow: 0 4px 16px rgba(196, 90, 40, 0.3);
+  }
+
+  .dialog-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Theme toggle button - top right corner */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 150;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+  }
+
+  .theme-toggle:hover {
+    background: var(--btn-hover-bg);
+    transform: scale(1.1);
+  }
+
+  body.light-mode .theme-toggle {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+  <div class="bg-texture"></div>
+  <div id="particles"></div>
+
+  <!-- Theme toggle -->
+  <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">电 子 木 鱼</div>
+    <div class="merit-display">
+      <span class="merit-label">功 德</span>
+      <span class="merit-count" id="meritCount">0</span>
+    </div>
+  </div>
+
+  <!-- Wooden Fish -->
+  <div class="fish-container" id="fishContainer">
+    <div class="fish-aura"></div>
+    <div class="wooden-fish" id="woodenFish">
+            <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#e8875a"/>
+            <stop offset="35%" stop-color="#b8502a"/>
+            <stop offset="75%" stop-color="#6a2810"/>
+            <stop offset="100%" stop-color="#2a0c04"/>
+          </linearGradient>
+          <linearGradient id="tailGrad" x1="100%" y1="20%" x2="0%" y2="80%">
+            <stop offset="0%" stop-color="#c45a28"/>
+            <stop offset="50%" stop-color="#8b2e12"/>
+            <stop offset="100%" stop-color="#3a1004"/>
+          </linearGradient>
+          <radialGradient id="topHighlight" cx="45%" cy="25%" r="50%">
+            <stop offset="0%" stop-color="rgba(255,220,180,0.5)"/>
+            <stop offset="60%" stop-color="rgba(255,220,180,0.08)"/>
+            <stop offset="100%" stop-color="rgba(255,220,180,0)"/>
+          </radialGradient>
+          <linearGradient id="slitInner" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0a0402"/>
+            <stop offset="50%" stop-color="#1a0802"/>
+            <stop offset="100%" stop-color="#0a0402"/>
+          </linearGradient>
+          <linearGradient id="malletHandleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6a3818"/>
+            <stop offset="50%" stop-color="#a8502a"/>
+            <stop offset="100%" stop-color="#5a2810"/>
+          </linearGradient>
+          <radialGradient id="malletHeadGrad" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#a87045"/>
+            <stop offset="50%" stop-color="#7a4825"/>
+            <stop offset="100%" stop-color="#3a1808"/>
+          </radialGradient>
+        </defs>
+
+        <ellipse class="ground-shadow" cx="550" cy="620" rx="380" ry="15" fill="rgba(0,0,0,0.5)"/>
+
+        <g class="fish-body-wrap">
+          <path d="M 270 380
+                   C 180 320, 90 340, 30 390
+                   C 80 380, 130 385, 180 410
+                   C 130 435, 80 470, 30 480
+                   C 100 520, 180 530, 270 470
+                   C 260 440, 255 410, 270 380 Z"
+                fill="url(#tailGrad)"/>
+
+          <ellipse cx="550" cy="380" rx="340" ry="160" fill="url(#bodyGrad)"/>
+          <ellipse cx="550" cy="380" rx="340" ry="160" fill="url(#topHighlight)"/>
+
+          <path d="M 380 260
+                   C 420 200, 480 195, 530 230
+                   C 560 210, 620 200, 680 225
+                   C 720 215, 760 225, 780 255
+                   C 740 270, 680 275, 600 270
+                   C 500 265, 430 270, 380 260 Z"
+                fill="url(#bodyGrad)"/>
+
+          <path d="M 320 410
+                   C 420 450, 580 470, 740 445
+                   C 800 435, 840 425, 860 415"
+                fill="none" stroke="rgba(42,12,4,0.6)" stroke-width="3.5" stroke-linecap="round"/>
+
+          <g class="slit-opening">
+            <ellipse cx="580" cy="245" rx="160" ry="9" fill="url(#slitInner)"/>
+            <ellipse cx="580" cy="240" rx="160" ry="2" fill="rgba(212,168,71,0.6)"/>
+            <ellipse cx="580" cy="250" rx="160" ry="2" fill="rgba(212,168,71,0.3)"/>
+          </g>
+
+          <circle cx="830" cy="360" r="8" fill="#0a0402"/>
+          <circle cx="832" cy="357" r="2.5" fill="rgba(255,220,180,0.6)"/>
+
+          <ellipse cx="550" cy="380" rx="340" ry="160" fill="none" stroke="rgba(232,135,90,0.2)" stroke-width="2"/>
+        </g>
+
+        <g class="mallet">
+          <ellipse cx="900" cy="200" rx="40" ry="50" fill="url(#malletHeadGrad)"/>
+          <ellipse cx="888" cy="188" rx="10" ry="14" fill="rgba(220,170,120,0.5)" transform="rotate(-15 888 188)"/>
+          <ellipse cx="884" cy="183" rx="4" ry="5" fill="rgba(255,220,180,0.6)"/>
+          <rect x="896" y="245" width="10" height="370" rx="4" fill="url(#malletHandleGrad)"/>
+          <rect x="898" y="247" width="2" height="366" fill="rgba(200,140,80,0.4)"/>
+          <ellipse cx="900" cy="245" rx="8" ry="3" fill="#3a1408"/>
+        </g>
+      </svg>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="hint">
+      <span>点击木鱼</span>
+      <span class="dot"></span>
+      <span>或按 <kbd>Space</kbd> 键</span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="muteBtn">音效：开</button>
+      <button class="btn" id="autoBtn">自动敲击</button>
+      <button class="btn" id="textBtn">文字：功德</button>
+      <button class="btn" id="resetBtn">重置功德</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Wooden fish knock sound (base64 WAV) -->
+  
+
+  <audio id="knockSound" preload="auto" src="data:audio/wav;base64,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"></audio>
+
+  <!-- Confirm Dialog -->
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog">
+      <div class="dialog-icon">⚠️</div>
+      <div class="dialog-title">确认重置功德</div>
+      <div class="dialog-desc">当前功德 <strong id="dialogMeritCount">0</strong>，重置后将清零且不可恢复。</div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="dialogCancel">取消</button>
+        <button class="dialog-btn dialog-btn-confirm" id="dialogConfirm">确认重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto Knock Dialog -->
+  <div class="dialog-overlay" id="autoDialogOverlay">
+    <div class="dialog">
+      <div class="dialog-icon">🔨</div>
+      <div class="dialog-title">自动敲击</div>
+      <div class="dialog-desc">选择敲击间隔时间</div>
+      <div class="auto-interval-options" id="autoIntervalOptions">
+        <button class="interval-option" data-val="200">0.2秒</button>
+        <button class="interval-option selected" data-val="500">0.5秒</button>
+        <button class="interval-option" data-val="1000">1秒</button>
+        <button class="interval-option" data-val="2000">2秒</button>
+      </div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="autoDialogCancel">取消</button>
+        <button class="dialog-btn dialog-btn-confirm" id="autoDialogStart">开始</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Text Customization Dialog -->
+  <div class="dialog-overlay" id="textDialogOverlay">
+    <div class="dialog">
+      <div class="dialog-icon">📝</div>
+      <div class="dialog-title">敲击文字</div>
+      <div class="dialog-desc">选择或自定义敲击时显示的文字</div>
+      <div class="auto-interval-options" id="textPresetOptions" style="flex-wrap:wrap;">
+        <button class="interval-option selected" data-val="功德">功德</button>
+        <button class="interval-option" data-val="不气不气">不气不气</button>
+        <button class="interval-option" data-val="不要焦虑">不要焦虑</button>
+        <button class="interval-option" data-val="不要内卷">不要内卷</button>
+      </div>
+      <input type="text" id="customTextInput" placeholder="或输入自定义文字..."
+        style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);font-size:0.85rem;font-family:inherit;margin-bottom:20px;outline:none;"
+        maxlength="10">
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="textDialogCancel">取消</button>
+        <button class="dialog-btn dialog-btn-confirm" id="textDialogConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  'use strict';
+
+  const fishContainer = document.getElementById('fishContainer');
+  const meritCountEl = document.getElementById('meritCount');
+  const particlesEl = document.getElementById('particles');
+  const muteBtn = document.getElementById('muteBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const autoBtn = document.getElementById('autoBtn');
+  const textBtn = document.getElementById('textBtn');
+  const themeToggle = document.getElementById('themeToggle');
+  const toast = document.getElementById('toast');
+
+  let merit = 0;
+  let soundEnabled = true;
+  let hitTimeout = null;
+  let autoActive = false;
+  let autoTimer = null;
+  let autoIntervalVal = 500;
+  let customText = '功德';
+
+  const STORAGE_KEY = 'wooden_fish_merit';
+  const SOUND_KEY = 'wooden_fish_sound';
+  const TEXT_KEY = 'wooden_fish_text';
+  const THEME_KEY = 'wooden_fish_theme';
+
+  function loadState() {
+    try {
+      merit = parseInt(localStorage.getItem(STORAGE_KEY)) || 0;
+      soundEnabled = localStorage.getItem(SOUND_KEY) !== 'false';
+      var savedText = localStorage.getItem(TEXT_KEY);
+      if (savedText) customText = savedText;
+      if (localStorage.getItem(THEME_KEY) === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    } catch(e) {
+      merit = 0;
+      soundEnabled = true;
+    }
+  }
+
+  function saveMerit() {
+    try { localStorage.setItem(STORAGE_KEY, String(merit)); } catch(e) {}
+  }
+
+  function saveSoundPref() {
+    try { localStorage.setItem(SOUND_KEY, String(soundEnabled)); } catch(e) {}
+  }
+
+  function updateDisplay() {
+    meritCountEl.textContent = merit.toLocaleString();
+    meritCountEl.classList.add('bump');
+    setTimeout(() => meritCountEl.classList.remove('bump'), 120);
+  }
+
+  // Sound - Web Audio API with base64 decoded buffer
+  var audioCtx = null;
+  var audioBuffer = null;
+  var knockAudioEl = document.getElementById('knockSound');
+
+  function base64ToArrayBuffer(base64) {
+    var binaryStr = atob(base64);
+    var len = binaryStr.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  function initAudio() {
+    if (audioCtx) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) { return; }
+
+    if (!knockAudioEl || !knockAudioEl.src) return;
+
+    // Extract base64 part from data URI
+    var dataUri = knockAudioEl.src;
+    var b64Part = dataUri.split(',')[1];
+    if (!b64Part) return;
+
+    try {
+      var arrayBuffer = base64ToArrayBuffer(b64Part);
+      audioCtx.decodeAudioData(
+        arrayBuffer,
+        function(decoded) {
+          audioBuffer = decoded;
+        },
+        function(err) {
+          console.log('Audio decode failed:', err);
+        }
+      );
+    } catch(e) {
+      console.log('Audio init error:', e);
+    }
+  }
+
+  // Try to init audio on first user interaction
+  function ensureAudio() {
+    if (!audioCtx) initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playKnockSound() {
+    if (!soundEnabled) return;
+    ensureAudio();
+    if (!audioCtx || !audioBuffer) return;
+
+    var source = audioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    var gain = audioCtx.createGain();
+    gain.gain.value = 0.9;
+    source.connect(gain);
+    gain.connect(audioCtx.destination);
+    source.start(0);
+  }
+
+  // Visual effects
+  // Premium color palette for merit text
+  var meritColors = [
+    { color: '#d4a847', glow: 'rgba(212, 168, 71, 0.5)' },   // Gold
+    { color: '#e8a87c', glow: 'rgba(232, 168, 124, 0.5)' },   // Rose Gold
+    { color: '#f0d89a', glow: 'rgba(240, 216, 154, 0.5)' },   // Champagne
+    { color: '#b14a5a', glow: 'rgba(177, 74, 90, 0.5)' },     // Burgundy
+    { color: '#3aa0a0', glow: 'rgba(58, 160, 160, 0.5)' },    // Teal
+    { color: '#9a7ac0', glow: 'rgba(154, 122, 192, 0.5)' },   // Amethyst
+    { color: '#6a9ac4', glow: 'rgba(106, 154, 196, 0.5)' },   // Sapphire
+    { color: '#5aaa7a', glow: 'rgba(90, 170, 122, 0.5)' },    // Emerald
+    { color: '#e87a5a', glow: 'rgba(232, 122, 90, 0.5)' },    // Coral
+    { color: '#c8b8d8', glow: 'rgba(200, 184, 216, 0.5)' },   // Pearl Lavender
+    { color: '#e8c4b0', glow: 'rgba(232, 196, 176, 0.5)' },   // Blush
+    { color: '#8acccc', glow: 'rgba(138, 204, 204, 0.5)' },   // Aqua
+  ];
+  var colorIndex = 0;
+
+  function showMeritText(x, y) {
+    var text = document.createElement('div');
+    text.className = 'merit-text';
+    text.textContent = customText + ' +1';
+
+    // Pick next color in rotation
+    var c = meritColors[colorIndex % meritColors.length];
+    colorIndex++;
+
+    text.style.color = c.color;
+    text.style.textShadow = '0 0 24px ' + c.glow + ', 0 0 8px ' + c.glow;
+
+    var offsetX = (Math.random() - 0.5) * 50;
+    text.style.left = (x + offsetX) + 'px';
+    text.style.top = (y - 20) + 'px';
+
+    document.body.appendChild(text);
+    setTimeout(function() { text.remove(); }, 1600);
+  }
+
+  function showRipple(x, y) {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.left = (x - 90) + 'px';
+    ripple.style.top = (y - 90) + 'px';
+    fishContainer.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 900);
+  }
+
+  function hitFish(centerX, centerY) {
+    merit++;
+    updateDisplay();
+    saveMerit();
+
+    // Force re-trigger animation on rapid clicks
+    fishContainer.classList.remove('hit');
+    void fishContainer.offsetWidth; // force reflow
+    fishContainer.classList.add('hit');
+    clearTimeout(hitTimeout);
+    hitTimeout = setTimeout(() => fishContainer.classList.remove('hit'), 180);
+
+    showMeritText(centerX, centerY);
+    showRipple(centerX, centerY);
+    playKnockSound();
+  }
+
+  function hitFromEvent(e) {
+    let x, y;
+    if (e.touches && e.touches[0]) {
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
+    } else {
+      x = e.clientX;
+      y = e.clientY;
+    }
+    hitFish(x, y);
+  }
+
+  function hitFromCenter() {
+    const rect = fishContainer.getBoundingClientRect();
+    hitFish(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }
+
+  // Events
+  // Pre-init audio on first user interaction
+  document.addEventListener('mousedown', function() { ensureAudio(); }, { once: true });
+  document.addEventListener('keydown', function() { ensureAudio(); }, { once: true });
+  document.addEventListener('touchstart', function() { ensureAudio(); }, { once: true });
+
+  fishContainer.addEventListener('mousedown', (e) => { e.preventDefault(); hitFromEvent(e); });
+  fishContainer.addEventListener('touchstart', (e) => { e.preventDefault(); hitFromEvent(e); }, { passive: false });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === ' ') {
+      if (dialogOverlay.classList.contains('show') || autoDialogOverlay.classList.contains('show') || textDialogOverlay.classList.contains('show')) return;
+      e.preventDefault();
+      hitFromCenter();
+    }
+    if (e.key === 'Escape') {
+      if (dialogOverlay.classList.contains('show')) dialogOverlay.classList.remove('show');
+      if (autoDialogOverlay.classList.contains('show')) autoDialogOverlay.classList.remove('show');
+      if (textDialogOverlay.classList.contains('show')) textDialogOverlay.classList.remove('show');
+    }
+  });
+
+  // Theme toggle
+  function updateThemeIcon() {
+    themeToggle.textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+  }
+
+  themeToggle.addEventListener('click', function() {
+    document.body.classList.toggle('light-mode');
+    var isLight = document.body.classList.contains('light-mode');
+    try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch(e) {}
+    updateThemeIcon();
+    showToast(isLight ? '已切换至白天模式' : '已切换至夜间模式');
+  });
+
+  muteBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    saveSoundPref();
+    muteBtn.textContent = '音效：' + (soundEnabled ? '开' : '关');
+    showToast(soundEnabled ? '音效已开启' : '音效已关闭');
+  });
+
+  // --- Auto knock with dialog ---
+  function startAutoKnock() {
+    stopAutoKnock();
+    autoTimer = setInterval(function() {
+      hitFromCenter();
+    }, autoIntervalVal);
+  }
+
+  function stopAutoKnock() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  var autoDialogOverlay = document.getElementById('autoDialogOverlay');
+  var autoDialogCancel = document.getElementById('autoDialogCancel');
+  var autoDialogStart = document.getElementById('autoDialogStart');
+  var autoIntervalOptions = document.getElementById('autoIntervalOptions');
+  var autoOptionBtns = autoIntervalOptions.querySelectorAll('.interval-option');
+
+  // Interval selection
+  autoOptionBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      autoOptionBtns.forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      autoIntervalVal = parseInt(btn.getAttribute('data-val'));
+    });
+  });
+
+  // Auto button: show dialog if not active, stop if active
+  autoBtn.addEventListener('click', function() {
+    if (autoActive) {
+      // Stop auto knock
+      autoActive = false;
+      autoBtn.textContent = '自动敲击';
+      autoBtn.classList.remove('active');
+      stopAutoKnock();
+      showToast('自动敲击已关闭');
+    } else {
+      // Show dialog to pick interval
+      autoDialogOverlay.classList.add('show');
+    }
+  });
+
+  // Dialog: cancel
+  autoDialogCancel.addEventListener('click', function() {
+    autoDialogOverlay.classList.remove('show');
+  });
+
+  // Click outside to close
+  autoDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === autoDialogOverlay) {
+      autoDialogOverlay.classList.remove('show');
+    }
+  });
+
+  // Dialog: start
+  autoDialogStart.addEventListener('click', function() {
+    autoActive = true;
+    autoBtn.textContent = '停止自动';
+    autoBtn.classList.add('active');
+    autoDialogOverlay.classList.remove('show');
+    startAutoKnock();
+    showToast('自动敲击已开启');
+  });
+
+  // --- Text customization dialog ---
+  var textDialogOverlay = document.getElementById('textDialogOverlay');
+  var textDialogCancel = document.getElementById('textDialogCancel');
+  var textDialogConfirm = document.getElementById('textDialogConfirm');
+  var textPresetOptions = document.getElementById('textPresetOptions');
+  var textOptionBtns = textPresetOptions.querySelectorAll('.interval-option');
+  var customTextInput = document.getElementById('customTextInput');
+  var selectedTextVal = customText;
+
+  function updateTextBtn() {
+    textBtn.textContent = '文字：' + customText;
+  }
+
+  textBtn.addEventListener('click', function() {
+    selectedTextVal = customText;
+    customTextInput.value = '';
+    textOptionBtns.forEach(function(b) {
+      b.classList.toggle('selected', b.getAttribute('data-val') === customText);
+    });
+    textDialogOverlay.classList.add('show');
+  });
+
+  textOptionBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      textOptionBtns.forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selectedTextVal = btn.getAttribute('data-val');
+      customTextInput.value = '';
+    });
+  });
+
+  customTextInput.addEventListener('input', function() {
+    textOptionBtns.forEach(function(b) { b.classList.remove('selected'); });
+    selectedTextVal = customTextInput.value.trim();
+  });
+
+  textDialogCancel.addEventListener('click', function() {
+    textDialogOverlay.classList.remove('show');
+  });
+
+  textDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === textDialogOverlay) {
+      textDialogOverlay.classList.remove('show');
+    }
+  });
+
+  textDialogConfirm.addEventListener('click', function() {
+    var val = customTextInput.value.trim() || selectedTextVal;
+    if (!val) val = '功德';
+    customText = val;
+    try { localStorage.setItem(TEXT_KEY, customText); } catch(e) {}
+    updateTextBtn();
+    // Update merit label too
+    var meritLabelEl = document.querySelector('.merit-label');
+    if (meritLabelEl) meritLabelEl.textContent = customText.split('').join(' ');
+    textDialogOverlay.classList.remove('show');
+    showToast('敲击文字已设为「' + customText + '」');
+  });
+
+  // --- Reset with confirmation dialog ---
+  var dialogOverlay = document.getElementById('dialogOverlay');
+  var dialogMeritCount = document.getElementById('dialogMeritCount');
+  var dialogCancel = document.getElementById('dialogCancel');
+  var dialogConfirm = document.getElementById('dialogConfirm');
+
+  resetBtn.addEventListener('click', function() {
+    if (merit === 0) { showToast('当前功德已为零'); return; }
+    dialogMeritCount.textContent = merit.toLocaleString();
+    dialogOverlay.classList.add('show');
+  });
+
+  dialogCancel.addEventListener('click', function() {
+    dialogOverlay.classList.remove('show');
+  });
+
+  dialogOverlay.addEventListener('click', function(e) {
+    if (e.target === dialogOverlay) {
+      dialogOverlay.classList.remove('show');
+    }
+  });
+
+  dialogConfirm.addEventListener('click', function() {
+    var prev = merit;
+    merit = 0;
+    updateDisplay();
+    saveMerit();
+    dialogOverlay.classList.remove('show');
+    showToast('已重置功德（之前：' + prev.toLocaleString() + '）');
+  });
+
+  let toastTimeout = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // Ambient particles
+  function createParticles() {
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('div');
+      p.className = 'ambient-particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.bottom = '-10px';
+      p.style.animationDuration = (18 + Math.random() * 25) + 's';
+      p.style.animationDelay = (Math.random() * 25) + 's';
+      p.style.setProperty('--drift', (Math.random() - 0.5) * 80 + 'px');
+      const size = 1.5 + Math.random() * 2.5;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.opacity = 0.2 + Math.random() * 0.3;
+      particlesEl.appendChild(p);
+    }
+  }
+
+  loadState();
+  updateDisplay();
+  updateTextBtn();
+  updateThemeIcon();
+  muteBtn.textContent = '音效：' + (soundEnabled ? '开' : '关');
+  createParticles();
+})();
+</script>
+</body>
+</html>

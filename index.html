@@ -157,12 +157,284 @@
     text-shadow: 0 0 40px rgba(212, 168, 71, 0.25);
   }
 
-  .merit-count.bump {
+  
+  .merit-title {
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 0.25em;
+    opacity: 0.7;
+    transition: all 0.4s ease;
+  }
+
+  .merit-title.promote {
+    animation: titlePromote 0.6s cubic-bezier(0.17, 0.67, 0.35, 1.2);
+  }
+
+  @keyframes titlePromote {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.4); opacity: 1; color: #f0c860; }
+    100% { transform: scale(1); opacity: 0.7; }
+  }
+
+  /* Zen quote — follows merit text path after delay */
+  .zen-quote {
+    position: absolute;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-dim);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 29;
+    letter-spacing: 0.12em;
+    animation: zenFloat 2.4s ease-out 0.5s forwards;
+  }
+
+  @keyframes zenFloat {
+    0% { opacity: 0; transform: translateY(10px); }
+    20% { opacity: 0.6; }
+    60% { opacity: 0.6; transform: translateY(-30px); }
+    100% { opacity: 0; transform: translateY(-60px); }
+  }
+
+  /* Achievement banner */
+  .achieve-banner {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, rgba(240,200,96,0.15), rgba(212,168,71,0.08));
+    border: 1px solid rgba(212,168,71,0.3);
+    border-radius: 100px;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.17, 0.67, 0.35, 1.2);
+    backdrop-filter: blur(8px);
+  }
+
+  .achieve-banner.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .achieve-banner.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  .achieve-icon { font-size: 1.3rem; }
+  .achieve-name { font-size: 0.8rem; color: var(--gold); font-weight: 600; }
+
+  /* Badge wall */
+  .badge-wall {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.3s ease;
+  }
+
+  .badge-item.unlocked {
+    background: rgba(212,168,71,0.08);
+    border-color: rgba(212,168,71,0.2);
+  }
+
+  .badge-emoji {
+    font-size: 1.5rem;
+    filter: grayscale(100%) opacity(0.3);
+    transition: all 0.3s ease;
+  }
+
+  .badge-item.unlocked .badge-emoji {
+    filter: none;
+  }
+
+  .badge-name {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .badge-item.unlocked .badge-name {
+    color: var(--text-main);
+  }
+
+  .badge-progress {
+    font-size: 0.55rem;
+    color: var(--text-faint);
+  }
+
+  /* Badge unlock toast */
+  .badge-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, rgba(30,22,14,0.95), rgba(20,14,8,0.95));
+    border: 2px solid rgba(212,168,71,0.4);
+    border-radius: 16px;
+    padding: 16px 28px;
+    z-index: 400;
+    text-align: center;
+    pointer-events: none;
+    animation: badgeUnlock 2.5s ease-out forwards;
+    backdrop-filter: blur(12px);
+  }
+
+  @keyframes badgeUnlock {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    15% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    25% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  }
+
+  .badge-toast-icon { font-size: 2rem; margin-bottom: 4px; }
+  .badge-toast-title { font-size: 0.8rem; color: var(--gold); font-weight: 700; }
+  .badge-toast-name { font-size: 1rem; color: var(--text-main); }
+.merit-count.bump {
     transform: scale(1.06);
   }
 
   /* ===== Fish Area ===== */
-  .fish-container {
+  
+  /* Breathing mode ring */
+  .breath-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid rgba(212,168,71,0.3);
+    pointer-events: none;
+    transition: width 0.1s linear, height 0.1s linear, border-color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 5;
+  }
+
+  .breath-ring.inhale {
+    border-color: rgba(120,200,180,0.6);
+    box-shadow: 0 0 30px rgba(120,200,180,0.2);
+  }
+
+  .breath-ring.hold {
+    border-color: rgba(212,168,71,0.8);
+    box-shadow: 0 0 40px rgba(212,168,71,0.3);
+    animation: breathPulse 0.5s ease-in-out infinite alternate;
+  }
+
+  .breath-ring.exhale {
+    border-color: rgba(232,120,90,0.6);
+    box-shadow: 0 0 30px rgba(232,120,90,0.2);
+  }
+
+  @keyframes breathPulse {
+    0% { box-shadow: 0 0 30px rgba(212,168,71,0.3); }
+    100% { box-shadow: 0 0 50px rgba(212,168,71,0.6); }
+  }
+
+  /* Breathing phase text */
+  .breath-phase {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    font-weight: 700;
+    pointer-events: none;
+    z-index: 10;
+    transition: color 0.3s ease;
+    text-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+
+  .breath-phase.inhale { color: rgba(120,200,180,0.9); }
+  .breath-phase.hold { color: rgba(212,168,71,0.9); }
+  .breath-phase.exhale { color: rgba(232,120,90,0.9); }
+
+  /* Meditation round counter */
+  .meditation-counter {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--gold);
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .meditation-counter.visible { opacity: 1; }
+
+  /* Breathing settings dialog */
+  .breath-presets {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .breath-preset {
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .breath-preset.active {
+    background: rgba(212,168,71,0.12);
+    color: var(--gold);
+    border-color: rgba(212,168,71,0.3);
+  }
+
+  .breath-custom-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .breath-custom-row input {
+    width: 48px;
+    padding: 5px 6px;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.8rem;
+    font-family: inherit;
+  }
+
+  .breath-custom-row span {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+.fish-container {
     position: relative;
     display: flex;
     align-items: center;
@@ -229,7 +501,6 @@
     transform: scaleY(0.94) scaleX(1.04);
   }
 
-  /* Slit — no separate animation, follows body-wrap squash */
 
   .fish-container.hit .wooden-fish {
     transform: scale(1.06);
@@ -825,8 +1096,10 @@
   <div id="particles"></div>
 
   <!-- Theme toggle -->
-  <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+  <button class="theme-toggle" id="themeToggle" title="切换主题">☀️</button>
   <button class="theme-toggle" id="statsToggle" title="功德统计" style="top:68px;">📊</button>
+  <button class="theme-toggle" id="badgeToggle" title="成就徽章" style="top:116px;">🏅</button>
+  <button class="theme-toggle" id="helpToggle" title="玩法说明" style="top:164px;">❓</button>
 
   <!-- Header -->
   <div class="header">
@@ -834,11 +1107,21 @@
     <div class="merit-display">
       <span class="merit-label">功 德</span>
       <span class="merit-count" id="meritCount">0</span>
+      <span class="merit-title" id="meritTitle">沙弥</span>
     </div>
+  </div>
+
+  <!-- Achievement Banner -->
+  <div class="achieve-banner" id="achieveBanner">
+    <span class="achieve-icon" id="achieveBannerIcon"></span>
+    <span class="achieve-name" id="achieveBannerName"></span>
   </div>
 
   <!-- Wooden Fish -->
   <div class="fish-container" id="fishContainer">
+    <div class="breath-ring" id="breathRing"></div>
+    <div class="breath-phase" id="breathPhase"></div>
+    <div class="meditation-counter" id="meditationCounter"></div>
     <div class="fish-aura"></div>
     <div class="wooden-fish" id="woodenFish">
             <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
@@ -924,8 +1207,6 @@
           <ellipse cx="900" cy="245" rx="8" ry="3" fill="#3a1408"/>
         </g>
       </svg>
-        </g>
-      </svg>
     </div>
   </div>
 
@@ -949,6 +1230,7 @@
       <button class="btn" id="muteBtn">音效：开</button>
       <button class="btn" id="autoBtn">自动敲击</button>
       <button class="btn" id="textBtn">文字：功德</button>
+      <button class="btn" id="breatheBtn">🧘 禅修</button>
       <button class="btn" id="skinBtn">木鱼皮肤</button>
     </div>
   </div>
@@ -1011,12 +1293,72 @@
       <div class="stats-summary" id="statsSummary"></div>
       <div class="stats-chart" id="statsChart"></div>
       <button class="stats-clear" id="statsClear">清空所有数据</button>
+      <div style="border-top:1px solid rgba(212,168,71,0.1);margin:10px 0 6px;"></div>
+      <div id="statsMedSummary" style="text-align:center;font-size:0.75rem;color:var(--gold);opacity:0.7;"></div>
       <div class="dialog-actions" style="margin-top:8px;">
         <button class="dialog-btn dialog-btn-confirm" id="statsDialogClose">关闭</button>
       </div>
     </div>
   </div>
 
+
+  <!-- Breathing Settings Dialog -->
+  <div class="dialog-overlay" id="breathDialogOverlay">
+    <div class="dialog" style="max-width:360px;">
+      <div class="dialog-icon">🧘</div>
+      <div class="dialog-title">禅修呼吸</div>
+      <div class="dialog-desc">选择呼吸节奏</div>
+      <div class="breath-presets" id="breathPresets">
+        <button class="breath-preset active" data-preset="4-2-4">4-2-4</button>
+        <button class="breath-preset" data-preset="5-5-5">5-5-5</button>
+        <button class="breath-preset" data-preset="6-3-6">6-3-6</button>
+        <button class="breath-preset" data-preset="custom">自定义</button>
+      </div>
+      <div class="breath-custom-row" id="breathCustomRow" style="display:none;">
+        <input type="number" id="breathInhale" value="4" min="2" max="10" title="吸气"><span>秒吸</span>
+        <input type="number" id="breathHold" value="2" min="1" max="10" title="屏息"><span>秒屏</span>
+        <input type="number" id="breathExhale" value="4" min="2" max="10" title="呼气"><span>秒呼</span>
+      </div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="breathDialogCancel">取消</button>
+        <button class="dialog-btn dialog-btn-confirm" id="breathDialogStart">开始禅修</button>
+      </div>
+    </div>
+  </div>
+  <!-- Badge Wall Dialog -->
+  <div class="dialog-overlay" id="badgeDialogOverlay">
+    <div class="dialog" style="max-width:380px;">
+      <div class="dialog-icon">🏅</div>
+      <div class="dialog-title">成就徽章 <span style="font-size:0.7rem;color:var(--text-dim);" id="badgeCount"></span></div>
+      <div class="badge-wall" id="badgeWall"></div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-confirm" id="badgeDialogClose">关闭</button>
+      </div>
+    </div>
+  </div>
+  <!-- Help Dialog -->
+  <div class="dialog-overlay" id="helpDialogOverlay">
+    <div class="dialog" style="max-width:380px;text-align:left;">
+      <div class="dialog-title" style="text-align:center;">🎏 玩法说明</div>
+      <div style="font-size:0.78rem;color:var(--text-main);line-height:1.8;padding:0 4px;">
+        <p><strong>🖱️ 敲击</strong>：鼠标点击木鱼或按空格键</p>
+        <p><strong>📈 连击</strong>：0.5秒内连续敲击触发连击，飘字放大</p>
+        <p><strong>🎉 里程碑</strong>：100/500/1000/10000功德全屏庆祝</p>
+        <p><strong>🏷️ 称号</strong>：沙弥→比丘→行者→罗汉→尊者→菩萨→佛</p>
+        <p><strong>🌙 首敲</strong>：每日首次敲击功德双倍</p>
+        <p><strong>📊 统计</strong>：右上角📊查看日/周/月功德数据</p>
+        <p><strong>🎨 皮肤</strong>：经典红木/金漆/玉石/熊猫四款可选</p>
+        <p><strong>✏️ 文字</strong>：自定义敲击飘字（功德/不气不气等）</p>
+        <p><strong>⏱️ 自动</strong>：设置间隔自动敲击，解放双手</p>
+        <p><strong>🏅 徽章</strong>：10枚成就徽章等你解锁</p>
+        <p><strong>🧘 禅修</strong>：呼吸引导模式，吸-屏-呼三阶段，仅呼气时可敲</p>
+        <p><strong>🔄 双模式</strong>：点击🌙/☀️切换日夜主题</p>
+      </div>
+      <div class="dialog-actions" style="margin-top:12px;">
+        <button class="dialog-btn dialog-btn-confirm" id="helpDialogClose">知道了</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Text Customization Dialog -->
   <div class="dialog-overlay" id="textDialogOverlay">
@@ -1065,7 +1407,6 @@
   let lastHitTime = 0;
   let bestCombo = 0;
   let currentSkin = 'classic';
-  let skinBtnVisible = false;
 
   const STORAGE_KEY = 'wooden_fish_merit';
   const SOUND_KEY = 'wooden_fish_sound';
@@ -1074,6 +1415,8 @@
   const SKIN_KEY = 'wooden_fish_skin';
   const COMBO_KEY = 'wooden_fish_bestcombo';
   const DAILY_KEY = 'wooden_fish_daily';
+  const LAST_HIT_KEY = 'wooden_fish_last_hit';
+  const TITLE_KEY = 'wooden_fish_title_reached';
 
   function loadState() {
     try {
@@ -1084,7 +1427,8 @@
       var savedSkin = localStorage.getItem(SKIN_KEY);
       if (savedSkin) currentSkin = savedSkin;
       bestCombo = parseInt(localStorage.getItem(COMBO_KEY)) || 0;
-      if (localStorage.getItem(THEME_KEY) === 'light') {
+      // Default to light mode unless explicitly set to dark
+      if (localStorage.getItem(THEME_KEY) !== 'dark') {
         document.body.classList.add('light-mode');
       }
     } catch(e) {
@@ -1100,6 +1444,86 @@
   function saveSoundPref() {
     try { localStorage.setItem(SOUND_KEY, String(soundEnabled)); } catch(e) {}
   }
+
+
+  // Level titles
+  var levels = [
+    { min: 0,     title: '沙弥' },
+    { min: 200,   title: '比丘' },
+    { min: 600,   title: '行者' },
+    { min: 1800,  title: '罗汉' },
+    { min: 5000,  title: '尊者' },
+    { min: 15000, title: '菩萨' },
+    { min: 50000, title: '佛' }
+  ];
+
+  function getTitle(score) {
+    var title = '沙弥';
+    for (var i = levels.length - 1; i >= 0; i--) {
+      if (score >= levels[i].min) { title = levels[i].title; break; }
+    }
+    return title;
+  }
+
+  function getReachedTitles() {
+    try { return JSON.parse(localStorage.getItem(TITLE_KEY)) || []; } catch(e) { return []; }
+  }
+
+  function saveReachedTitle(title) {
+    var reached = getReachedTitles();
+    if (reached.indexOf(title) === -1) {
+      reached.push(title);
+      try { localStorage.setItem(TITLE_KEY, JSON.stringify(reached)); } catch(e) {}
+    }
+  }
+
+  function checkTitlePromotion() {
+    var currentTitle = getTitle(merit);
+    var titleEl = document.getElementById('meritTitle');
+    if (!titleEl) return;
+    titleEl.textContent = currentTitle;
+
+    var reached = getReachedTitles();
+    if (reached.indexOf(currentTitle) === -1) {
+      saveReachedTitle(currentTitle);
+      // Big celebration for level up
+      if (currentTitle !== '沙弥') {
+        showCelebration(merit);
+        var overlay = document.querySelector('.celebrate-overlay');
+        if (overlay) {
+          var extra = document.createElement('div');
+          extra.style.cssText = 'position:fixed;top:40%;left:50%;transform:translateX(-50%);font-size:1.6rem;color:#f0c860;z-index:302;text-shadow:0 0 30px rgba(240,200,96,0.6);pointer-events:none;animation:celebrateIn 0.6s cubic-bezier(0.17,0.67,0.35,1.2) forwards,celebrateOut 0.5s 2.5s ease-in forwards;';
+          extra.textContent = '晋升：' + currentTitle;
+          overlay.appendChild(extra);
+        }
+      }
+      // Flash animation
+      titleEl.classList.remove('promote');
+      void titleEl.offsetWidth;
+      titleEl.classList.add('promote');
+    }
+  }
+
+  // Daily double
+  var dailyDoubleUsed = false;
+
+  function checkDailyDouble() {
+    var today = new Date().toISOString().split('T')[0];
+    var lastHit = localStorage.getItem(LAST_HIT_KEY);
+    if (lastHit !== today) {
+      dailyDoubleUsed = false;
+    }
+    return lastHit !== today;
+  }
+
+  // Zen quotes pool
+  var zenQuotes = [
+    '放下执念', '顺其自然', '心静自然凉', '一切都是最好的安排',
+    '慈悲为怀', '随缘不变，不变随缘', '一念放下，万般自在',
+    '活在当下', '不忘初心', '知足常乐', '善哉善哉',
+    '缘起缘灭', '心若止水', '不争不抢，自有天地',
+    '笑看风云', '舍得之间，自有因果'
+  ];
 
   function updateDisplay() {
     meritCountEl.textContent = merit.toLocaleString();
@@ -1282,10 +1706,21 @@
   }
 
   function hitFish(centerX, centerY) {
-    merit++;
+    // Daily double check
+    var isDailyFirst = checkDailyDouble();
+    var addAmount = 1;
+    var wasDailyDouble = false;
+    if (isDailyFirst && !dailyDoubleUsed) {
+      addAmount = 2;
+      wasDailyDouble = true;
+      dailyDoubleUsed = true;
+      try { localStorage.setItem(LAST_HIT_KEY, new Date().toISOString().split('T')[0]); } catch(e) {}
+    }
+    merit += addAmount;
     saveDailyData();
     updateDisplay();
     saveMerit();
+    checkTitlePromotion();
 
     // Combo tracking
     var now = Date.now();
@@ -1319,13 +1754,33 @@
       }
     }
 
+    // Zen quote (10% chance) — follows merit text path after delay
+    if (Math.random() < 0.1) {
+      var qx = centerX, qy = centerY;
+      var quote = document.createElement('div');
+      quote.className = 'zen-quote';
+      quote.textContent = '「' + zenQuotes[Math.floor(Math.random() * zenQuotes.length)] + '」';
+      var qOffsetX = (Math.random() - 0.5) * 40;
+      quote.style.left = (qx + qOffsetX) + 'px';
+      quote.style.top = (qy + 20) + 'px';
+      document.body.appendChild(quote);
+      setTimeout(function() { quote.remove(); }, 3000);
+    }
+
     // Force re-trigger animation on rapid clicks
+    // Daily first toast
+    if (wasDailyDouble) {
+      showToast('今日首敲，功德双倍 ✨');
+    }
+
     fishContainer.classList.remove('hit');
     void fishContainer.offsetWidth;
     fishContainer.classList.add('hit');
     clearTimeout(hitTimeout);
     hitTimeout = setTimeout(() => fishContainer.classList.remove('hit'), 260);
 
+    trackSpeedHit();
+    checkBadges();
     showMeritText(centerX, centerY);
     showRipple(centerX, centerY);
     playKnockSound();
@@ -1354,13 +1809,14 @@
   document.addEventListener('keydown', function() { ensureAudio(); }, { once: true });
   document.addEventListener('touchstart', function() { ensureAudio(); }, { once: true });
 
-  fishContainer.addEventListener('mousedown', (e) => { e.preventDefault(); hitFromEvent(e); });
-  fishContainer.addEventListener('touchstart', (e) => { e.preventDefault(); hitFromEvent(e); }, { passive: false });
+  fishContainer.addEventListener('mousedown', (e) => { e.preventDefault(); if (onBreatheClick(e)) return; hitFromEvent(e); });
+  fishContainer.addEventListener('touchstart', (e) => { e.preventDefault(); if (onBreatheClick(e)) return; hitFromEvent(e); }, { passive: false });
 
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === ' ') {
-      if (dialogOverlay.classList.contains('show') || autoDialogOverlay.classList.contains('show') || textDialogOverlay.classList.contains('show') || statsDialogOverlay.classList.contains('show')) return;
+      if (dialogOverlay.classList.contains('show') || autoDialogOverlay.classList.contains('show') || textDialogOverlay.classList.contains('show') || statsDialogOverlay.classList.contains('show') || (helpDialogOverlay && helpDialogOverlay.classList.contains('show')) || (breathDialogOverlay && breathDialogOverlay.classList.contains('show')) || (badgeDialogOverlay && badgeDialogOverlay.classList.contains('show'))) return;
       e.preventDefault();
+      if (breatheActive && breathePhaseName !== 'exhale') return;
       hitFromCenter();
     }
     if (e.key === 'Escape') {
@@ -1368,9 +1824,396 @@
       if (autoDialogOverlay.classList.contains('show')) autoDialogOverlay.classList.remove('show');
       if (textDialogOverlay.classList.contains('show')) textDialogOverlay.classList.remove('show');
       if (statsDialogOverlay.classList.contains('show')) statsDialogOverlay.classList.remove('show');
+      if (helpDialogOverlay && helpDialogOverlay.classList.contains('show')) helpDialogOverlay.classList.remove('show');
+      if (breathDialogOverlay && breathDialogOverlay.classList.contains('show')) breathDialogOverlay.classList.remove('show');
+      if (badgeDialogOverlay && badgeDialogOverlay.classList.contains('show')) badgeDialogOverlay.classList.remove('show');
     }
   });
 
+
+
+  // --- Breathing / Meditation Mode ---
+  var breatheBtn = document.getElementById('breatheBtn');
+  var breathRing = document.getElementById('breathRing');
+  var breathPhase = document.getElementById('breathPhase');
+  var meditationCounter = document.getElementById('meditationCounter');
+  var breathDialogOverlay = null;
+  var breathDialogStart = null;
+  var breathDialogCancel = null;
+  var breathPresets = null;
+  var breathCustomRow = null;
+
+  var MEDITATION_KEY = 'wooden_fish_meditation';
+  var breatheActive = false;
+  var breatheTimer = null;
+  var breathePhaseName = ''; // 'inhale', 'hold', 'exhale'
+  var breatheRound = 0;
+  var totalRounds = 0;
+  var breatheSettings = { inhale: 4, hold: 2, exhale: 4 };
+  var breathePreset = '4-2-4';
+  var breathePhaseStart = 0;
+  var breatheFrameId = null;
+
+  function loadMeditation() {
+    try { totalRounds = parseInt(localStorage.getItem(MEDITATION_KEY)) || 0; } catch(e) { totalRounds = 0; }
+  }
+  function saveMeditation() {
+    try { localStorage.setItem(MEDITATION_KEY, String(totalRounds)); } catch(e) {}
+  }
+
+  function getFishSize() {
+    var rect = fishContainer.getBoundingClientRect();
+    return Math.max(rect.width, rect.height);
+  }
+
+  function updateBreathRing() {
+    if (!breatheActive) return;
+    var elapsed = (Date.now() - breathePhaseStart) / 1000;
+    var dur, phaseMax;
+
+    if (breathePhaseName === 'inhale') {
+      dur = breatheSettings.inhale;
+      phaseMax = getFishSize() + 80;
+      var pct = Math.min(elapsed / dur, 1);
+      var sz = getFishSize() * 0.7 + pct * (phaseMax - getFishSize() * 0.7);
+      breathRing.style.width = sz + 'px';
+      breathRing.style.height = sz + 'px';
+    } else if (breathePhaseName === 'exhale') {
+      dur = breatheSettings.exhale;
+      phaseMax = getFishSize() + 80;
+      var pct2 = Math.min(elapsed / dur, 1);
+      var sz2 = phaseMax - pct2 * (phaseMax - getFishSize() * 0.7);
+      breathRing.style.width = sz2 + 'px';
+      breathRing.style.height = sz2 + 'px';
+    }
+  }
+
+  function startBreathePhase(phase) {
+    breathePhaseName = phase;
+    breathePhaseStart = Date.now();
+    breathRing.className = 'breath-ring ' + phase;
+    breathPhase.className = 'breath-phase ' + phase;
+
+    if (phase === 'inhale') {
+      breathPhase.textContent = '吸';
+      breatheRound++;
+      meditationCounter.textContent = '第 ' + breatheRound + ' 轮';
+      meditationCounter.classList.add('visible');
+    } else if (phase === 'hold') {
+      breathPhase.textContent = '屏';
+    } else if (phase === 'exhale') {
+      breathPhase.textContent = '敲';
+    }
+
+    // Schedule next phase
+    var dur = breatheSettings[phase] || 4;
+    clearTimeout(breatheTimer);
+    breatheTimer = setTimeout(function() {
+      if (!breatheActive) return;
+      if (phase === 'inhale') startBreathePhase('hold');
+      else if (phase === 'hold') startBreathePhase('exhale');
+      else if (phase === 'exhale') startBreathePhase('inhale');
+    }, dur * 1000);
+
+    // Ring animation
+    if (breatheFrameId) cancelAnimationFrame(breatheFrameId);
+    function animate() {
+      if (!breatheActive) return;
+      updateBreathRing();
+      breatheFrameId = requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  function startBreathing() {
+    breatheActive = true;
+    breatheRound = 0;
+    breathRing.style.display = 'block';
+    breathPhase.style.display = 'block';
+    breathRing.style.width = getFishSize() * 0.7 + 'px';
+    breathRing.style.height = getFishSize() * 0.7 + 'px';
+    breatheBtn.textContent = '⏹ 停止禅修';
+    breatheBtn.classList.add('active');
+    startBreathePhase('inhale');
+  }
+
+  function stopBreathing() {
+    breatheActive = false;
+    clearTimeout(breatheTimer);
+    if (breatheFrameId) cancelAnimationFrame(breatheFrameId);
+    breatheFrameId = null;
+    breathRing.style.display = 'none';
+    breathPhase.style.display = 'none';
+    breathRing.className = 'breath-ring';
+    breathPhase.className = 'breath-phase';
+    meditationCounter.classList.remove('visible');
+    breatheBtn.textContent = '🧘 禅修';
+    breatheBtn.classList.remove('active');
+    var completed = breatheRound - (breathePhaseName === 'inhale' ? 1 : 0);
+    if (completed > 0) {
+      totalRounds += completed;
+      saveMeditation();
+      showToast('完成 ' + completed + ' 轮禅修');
+      checkBadges();
+    }
+  }
+
+  function onBreatheClick(e) {
+    if (!breatheActive) return false;
+    if (breathePhaseName !== 'exhale') {
+      // Too early - gentle nudge
+      if (breathPhase.textContent !== '敲') {
+        breathPhase.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        setTimeout(function() {
+          breathPhase.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, 150);
+      }
+      return true; // consumed click
+    }
+    // Successful hit during exhale
+    return false; // let normal hitFish process
+  }
+
+  // Stats panel - add meditation data
+  function renderMedStats() {
+    var el = document.getElementById('statsMedSummary');
+    if (el) el.textContent = '🧘 累计禅修：' + totalRounds + ' 轮';
+  }
+
+  // Expose for stats clear
+  function clearMeditation() {
+    totalRounds = 0;
+    try { localStorage.removeItem(MEDITATION_KEY); } catch(e) {}
+  }
+
+
+  // Breathing mode dialogs
+  breathDialogOverlay = document.getElementById('breathDialogOverlay');
+  breathDialogStart = document.getElementById('breathDialogStart');
+  breathDialogCancel = document.getElementById('breathDialogCancel');
+  breathPresets = document.getElementById('breathPresets');
+  breathCustomRow = document.getElementById('breathCustomRow');
+
+  var inhaleInput = document.getElementById('breathInhale');
+  var holdInput = document.getElementById('breathHold');
+  var exhaleInput = document.getElementById('breathExhale');
+
+  breatheBtn.addEventListener('click', function() {
+    if (breatheActive) {
+      stopBreathing();
+      return;
+    }
+    // Show settings dialog
+    breathDialogOverlay.classList.add('show');
+  });
+
+  breathPresets.querySelectorAll('.breath-preset').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      breathPresets.querySelectorAll('.breath-preset').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      breathePreset = btn.getAttribute('data-preset');
+      if (breathePreset === 'custom') {
+        breathCustomRow.style.display = 'flex';
+      } else {
+        breathCustomRow.style.display = 'none';
+        var parts = breathePreset.split('-');
+        breatheSettings.inhale = parseInt(parts[0]);
+        breatheSettings.hold = parseInt(parts[1]);
+        breatheSettings.exhale = parseInt(parts[2]);
+      }
+    });
+  });
+
+  breathDialogStart.addEventListener('click', function() {
+    if (breathePreset === 'custom') {
+      breatheSettings.inhale = parseInt(inhaleInput.value) || 4;
+      breatheSettings.hold = parseInt(holdInput.value) || 2;
+      breatheSettings.exhale = parseInt(exhaleInput.value) || 4;
+    }
+    breathDialogOverlay.classList.remove('show');
+    startBreathing();
+  });
+
+  breathDialogCancel.addEventListener('click', function() {
+    breathDialogOverlay.classList.remove('show');
+  });
+
+  breathDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === breathDialogOverlay) {
+      breathDialogOverlay.classList.remove('show');
+    }
+  });
+
+
+  // --- Achievement Badges ---
+  var BADGE_KEY = 'wooden_fish_badges';
+  var badgeToggle = document.getElementById('badgeToggle');
+  var badgeDialogOverlay = document.getElementById('badgeDialogOverlay');
+  var badgeWall = document.getElementById('badgeWall');
+  var badgeCount = document.getElementById('badgeCount');
+  var badgeDialogClose = document.getElementById('badgeDialogClose');
+  var achieveBanner = document.getElementById('achieveBanner');
+  var achieveBannerIcon = document.getElementById('achieveBannerIcon');
+  var achieveBannerName = document.getElementById('achieveBannerName');
+  var bannerTimeout = null;
+
+  var badges = [
+    { id: 'knock100', name: '百敲不倦', emoji: '🥇', check: function() { return dailyTodayHits >= 100; }, progress: function() { return dailyTodayHits + '/100'; } },
+    { id: 'combo15', name: '连击达人', emoji: '🔥', check: function() { return comboCount >= 15; }, progress: function() { return '最高' + bestCombo + '/15'; } },
+    { id: 'nightowl', name: '夜猫子', emoji: '🌙', check: function() { var h = new Date().getHours(); return h >= 0 && h < 5; }, progress: function() { return '凌晨0-5点敲击'; } },
+    { id: 'merit10k', name: '功德圆满', emoji: '🎓', check: function() { return merit >= 10000; }, progress: function() { return (merit >= 10000 ? '10000' : merit) + '/10000'; } },
+    { id: 'collector', name: '收藏家', emoji: '🎨', check: function() { return false; }, progress: function() { var u = getUnlockedSkins(); return u + '/4'; } },
+    { id: 'streak7', name: '七日修行', emoji: '📿', check: function() { return getConsecutiveDays() >= 7; }, progress: function() { return getConsecutiveDays() + '/7天'; } },
+    { id: 'speed5', name: '秒速狂人', emoji: '⚡', check: function() { return speedCount >= 5; }, progress: function() { return speedCount + '/5'; } },
+    { id: 'meditate10', name: '禅修初成', emoji: '🧘', check: function() { return totalRounds >= 10; }, progress: function() { return totalRounds + '/10轮'; } },
+    { id: 'combo50', name: '五十连击', emoji: '💥', check: function() { return comboCount >= 50; }, progress: function() { return '最高' + bestCombo + '/50'; } },
+    { id: 'total1k', name: '千锤百炼', emoji: '💎', check: function() { return merit >= 1000; }, progress: function() { return (merit >= 1000 ? '1000' : merit) + '/1000'; } }
+  ];
+
+  var unlockedBadges = [];
+  var dailyTodayHits = 0;
+  var speedCount = 0;
+  var speedTimer = null;
+
+  function loadBadges() {
+    try { unlockedBadges = JSON.parse(localStorage.getItem(BADGE_KEY)) || []; } catch(e) { unlockedBadges = []; }
+    updateBadgeButton();
+  }
+
+  function saveBadges() {
+    try { localStorage.setItem(BADGE_KEY, JSON.stringify(unlockedBadges)); } catch(e) {}
+  }
+
+  function isUnlocked(id) { return unlockedBadges.indexOf(id) !== -1; }
+
+  function unlockBadge(badge) {
+    if (isUnlocked(badge.id)) return;
+    unlockedBadges.push(badge.id);
+    saveBadges();
+    updateBadgeButton();
+
+    // Toast
+    var toast = document.createElement('div');
+    toast.className = 'badge-toast';
+    toast.innerHTML = '<div class="badge-toast-icon">' + badge.emoji + '</div><div class="badge-toast-title">成就解锁！</div><div class="badge-toast-name">' + badge.name + '</div>';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 2600);
+
+    // Banner
+    achieveBannerIcon.textContent = badge.emoji;
+    achieveBannerName.textContent = badge.name;
+    achieveBanner.classList.remove('hide');
+    achieveBanner.classList.add('show');
+    clearTimeout(bannerTimeout);
+    bannerTimeout = setTimeout(function() {
+      achieveBanner.classList.add('hide');
+      achieveBanner.classList.remove('show');
+    }, 4000);
+  }
+
+  function updateBadgeButton() {
+    badgeToggle.textContent = '🏅';
+  }
+
+  function checkBadges() {
+    badges.forEach(function(b) {
+      if (!isUnlocked(b.id) && b.check()) {
+        unlockBadge(b);
+      }
+    });
+  }
+
+  function getConsecutiveDays() {
+    var data = getDailyData();
+    var dates = Object.keys(data).sort().reverse();
+    var streak = 0;
+    var today = new Date().toISOString().split('T')[0];
+    // Check if today has data
+    if (!data[today] || data[today] === 0) return streak;
+    streak = 1;
+    var d = new Date();
+    for (var i = 1; i < 365; i++) {
+      d.setDate(d.getDate() - 1);
+      var ds = d.toISOString().split('T')[0];
+      if (data[ds] && data[ds] > 0) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function getUnlockedSkins() {
+    var s = [];
+    if (isUnlocked('collector')) return 4; // already checked
+    try {
+      // Check if user has used each skin by looking in localStorage
+      var usedSkins = JSON.parse(localStorage.getItem('wooden_fish_skins_used')) || [];
+      if (usedSkins.indexOf('classic') !== -1) s.push(1);
+      if (usedSkins.indexOf('gold') !== -1) s.push(1);
+      if (usedSkins.indexOf('jade') !== -1) s.push(1);
+      if (usedSkins.indexOf('panda') !== -1) s.push(1);
+    } catch(e) {}
+    return s.length;
+  }
+
+  // Track skin usage
+  function trackSkin(skin) {
+    try {
+      var used = JSON.parse(localStorage.getItem('wooden_fish_skins_used')) || [];
+      if (used.indexOf(skin) === -1) {
+        used.push(skin);
+        localStorage.setItem('wooden_fish_skins_used', JSON.stringify(used));
+        checkBadges();
+      }
+    } catch(e) {}
+  }
+
+  // Speed counter (1 second window)
+  function trackSpeedHit() {
+    speedCount++;
+    clearTimeout(speedTimer);
+    speedTimer = setTimeout(function() { speedCount = 0; }, 1000);
+  }
+
+  // Update daily hits tracker
+  function updateDailyHits() {
+    var today = new Date().toISOString().split('T')[0];
+    var data = getDailyData();
+    dailyTodayHits = data[today] || 0;
+  }
+
+  // Render badge wall
+  function renderBadgeWall() {
+    badgeCount.textContent = unlockedBadges.length + '/' + badges.length;
+    var html = '';
+    badges.forEach(function(b) {
+      var unlocked = isUnlocked(b.id);
+      html += '<div class="badge-item' + (unlocked ? ' unlocked' : '') + '">';
+      html += '<div class="badge-emoji">' + b.emoji + '</div>';
+      html += '<div class="badge-name">' + b.name + '</div>';
+      if (!unlocked) {
+        html += '<div class="badge-progress">' + b.progress() + '</div>';
+      }
+      html += '</div>';
+    });
+    badgeWall.innerHTML = html;
+  }
+
+  // Badge dialog events
+  badgeToggle.addEventListener('click', function() {
+    updateDailyHits();
+    renderBadgeWall();
+    badgeDialogOverlay.classList.add('show');
+  });
+
+  badgeDialogClose.addEventListener('click', function() {
+    badgeDialogOverlay.classList.remove('show');
+  });
+
+  badgeDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === badgeDialogOverlay) {
+      badgeDialogOverlay.classList.remove('show');
+    }
+  });
 
   // --- Skin switching ---
   var skinBtn = document.getElementById('skinBtn');
@@ -1388,6 +2231,7 @@
 
   function applySkin(skin) {
     currentSkin = skin;
+    trackSkin(skin);
     var c = skinColors[skin];
     var svg = woodenFishEl.querySelector('svg');
     if (!svg) return;
@@ -1436,12 +2280,19 @@
     });
   }
 
-  // Remove unused function
-  function updateSVGGradients() {}
-
-  skinBtn.addEventListener('click', function() {
+  skinBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
     skinGroup.classList.toggle('show');
     skinBtn.classList.toggle('active', skinGroup.classList.contains('show'));
+  });
+
+  skinGroup.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
+  document.addEventListener('click', function() {
+    skinGroup.classList.remove('show');
+    skinBtn.classList.remove('active');
   });
 
   skinDots.forEach(function(dot) {
@@ -1476,6 +2327,7 @@
     });
 
     try { localStorage.setItem(DAILY_KEY, JSON.stringify(cleaned)); } catch(e) {}
+    try { localStorage.setItem(LAST_HIT_KEY, today); } catch(e) {}
   }
 
   function getWeekRange() {
@@ -1489,19 +2341,6 @@
       var d = new Date(mon);
       d.setDate(mon.getDate() + i);
       days.push({ date: d.toISOString().split('T')[0], label: labels[i] });
-    }
-    return days;
-  }
-
-  function getMonthDays() {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth();
-    var lastDay = new Date(year, month + 1, 0).getDate();
-    var days = [];
-    for (var i = 1; i <= lastDay; i++) {
-      var ds = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
-      days.push({ date: ds, label: String(i) });
     }
     return days;
   }
@@ -1607,6 +2446,7 @@
   }
 
   statsToggleBtn.addEventListener('click', function() {
+    renderMedStats();
     currentStatsTab = 'day';
     selectedMonth = null;
     selectedYear = null;
@@ -1681,10 +2521,8 @@
       return;
     }
     // Direct click on button text → switch to month tab, preserving current selection
-    // If currently on day/week tab, show current month; if already on month, keep whatever is selected
-    if (currentStatsTab !== 'month') {
-      selectedMonth = null;
-      selectedYear = null;
+    // Only reset to current month if no historical month was previously selected
+    if (selectedMonth === null && selectedYear === null) {
       statsMonthLabel.textContent = '本月';
     }
     currentStatsTab = 'month';
@@ -1705,9 +2543,6 @@
       currentStatsTab = tab.getAttribute('data-tab');
       statsTabs.querySelectorAll('.stats-tab').forEach(function(t) { t.classList.remove('active'); });
       tab.classList.add('active');
-      selectedMonth = null;
-      selectedYear = null;
-      statsMonthLabel.textContent = '本月';
       renderStats();
     });
   });
@@ -1719,6 +2554,25 @@
   statsDialogOverlay.addEventListener('click', function(e) {
     if (e.target === statsDialogOverlay) {
       statsDialogOverlay.classList.remove('show');
+    }
+  });
+
+  // --- Help dialog ---
+  var helpToggle = document.getElementById('helpToggle');
+  var helpDialogOverlay = document.getElementById('helpDialogOverlay');
+  var helpDialogClose = document.getElementById('helpDialogClose');
+
+  helpToggle.addEventListener('click', function() {
+    helpDialogOverlay.classList.add('show');
+  });
+
+  helpDialogClose.addEventListener('click', function() {
+    helpDialogOverlay.classList.remove('show');
+  });
+
+  helpDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === helpDialogOverlay) {
+      helpDialogOverlay.classList.remove('show');
     }
   });
 
@@ -1746,6 +2600,13 @@
       updateDisplay();
       saveMerit();
       try { localStorage.removeItem(DAILY_KEY); } catch(e) {}
+      try { localStorage.removeItem(TITLE_KEY); } catch(e) {}
+      try { localStorage.removeItem(LAST_HIT_KEY); } catch(e) {}
+      clearMeditation();
+      try { localStorage.removeItem(BADGE_KEY); } catch(e) {}
+      try { localStorage.removeItem('wooden_fish_skins_used'); } catch(e) {}
+      unlockedBadges = [];
+      updateBadgeButton();
       // Reset combo too
       comboCount = 0;
       bestCombo = 0;
@@ -1783,7 +2644,7 @@
     var isLight = document.body.classList.contains('light-mode');
     try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch(e) {}
     updateThemeIcon();
-    showToast(isLight ? '已切换至白天模式' : '已切换至夜间模式');
+    showToast(isLight ? '已退出深色模式' : '已切换至深色模式');
   });
 
   muteBtn.addEventListener('click', () => {
@@ -1919,9 +2780,8 @@
     showToast('敲击文字已设为「' + customText + '」');
   });
 
-  // --- Reset with confirmation dialog ---
+  // --- Confirm dialog (reused by stats clear) ---
   var dialogOverlay = document.getElementById('dialogOverlay');
-  var dialogMeritCount = document.getElementById('dialogMeritCount');
   var dialogCancel = document.getElementById('dialogCancel');
   var dialogConfirm = document.getElementById('dialogConfirm');
 
@@ -1963,6 +2823,8 @@
   }
 
   loadState();
+  loadMeditation();
+  loadBadges();
   updateDisplay();
   updateTextBtn();
   updateThemeIcon();

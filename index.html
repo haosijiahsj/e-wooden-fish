@@ -202,15 +202,21 @@
     fill: rgba(0, 0, 0, 0.15);
   }
 
-  /* Mallet swing animation */
+  /* Mallet swing — pick up, strike, return */
   .mallet {
     transform-origin: 900px 615px;
-    transform: rotate(0deg);
-    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  @keyframes malletStrike {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    20%  { transform: translate(-80px, -200px) rotate(15deg); }  /* lift up & back */
+    55%  { transform: translate(20px, 20px) rotate(-40deg); }    /* strike down hard */
+    100% { transform: translate(0, 0) rotate(0deg); }            /* return to rest */
   }
 
   .fish-container.hit .mallet {
-    transform: rotate(-30deg);
+    animation: malletStrike 0.28s ease-out;
   }
 
   /* Fish squash on hit */
@@ -223,16 +229,7 @@
     transform: scaleY(0.94) scaleX(1.04);
   }
 
-  /* Slit pulse animation */
-  .slit-opening {
-    transform-origin: center;
-    transform: scaleY(1);
-    transition: transform 0.12s ease-out;
-  }
-
-  .fish-container.hit .slit-opening {
-    transform: scaleY(1.3);
-  }
+  /* Slit — no separate animation, follows body-wrap squash */
 
   .fish-container.hit .wooden-fish {
     transform: scale(1.06);
@@ -253,7 +250,108 @@
   }
 
   /* Floating merit text */
-  .merit-text {
+  
+  /* Combo display */
+  .combo-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 25;
+    animation: comboPop 1s cubic-bezier(0.17, 0.67, 0.35, 1.2) forwards;
+  }
+
+  @keyframes comboPop {
+    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -60%) scale(1); opacity: 0; }
+  }
+
+  /* Celebration overlay */
+  .celebrate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .celebrate-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #f0c860;
+    text-shadow: 0 0 40px rgba(240,200,96,0.8), 0 0 80px rgba(240,200,96,0.4);
+    animation: celebrateIn 0.6s cubic-bezier(0.17, 0.67, 0.35, 1.2) forwards, celebrateOut 0.5s 2s ease-in forwards;
+    z-index: 301;
+  }
+
+  @keyframes celebrateIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes celebrateOut {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* Confetti particle */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 299;
+    animation: confettiBurst 2s ease-out forwards;
+  }
+
+  @keyframes confettiBurst {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+  }
+
+  /* Skin selector */
+  .skin-group {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    gap: 8px;
+    z-index: 150;
+    padding: 8px;
+    border-radius: 100px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    backdrop-filter: blur(8px);
+  }
+
+  .skin-group.show {
+    display: flex;
+  }
+
+  .skin-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .skin-dot:hover { transform: scale(1.15); }
+  .skin-dot.active { border-color: var(--gold); }
+
+  .skin-dot.classic { background: linear-gradient(135deg, #e8875a, #6a2810); }
+  .skin-dot.gold { background: linear-gradient(135deg, #f0c860, #8b6914); }
+  .skin-dot.jade { background: linear-gradient(135deg, #8ac8a0, #2a6040); }
+  .skin-dot.panda { background: linear-gradient(135deg, #808080, #1a1a1a); }
+.merit-text {
     position: absolute;
     font-size: 1.4rem;
     font-weight: 700;
@@ -354,7 +452,180 @@
     color: var(--text-main);
   }
 
-  .interval-option.selected {
+  
+  /* Stats chart */
+  .stats-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    height: 140px;
+    padding: 0 10px;
+    margin-bottom: 10px;
+  }
+
+  .stats-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .stats-bar {
+    width: 100%;
+    max-width: 40px;
+    min-height: 4px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, rgba(212,168,71,0.8), rgba(212,168,71,0.3));
+    transition: height 0.4s ease;
+  }
+
+  .stats-bar.today {
+    background: linear-gradient(180deg, #f0c860, #d4a847);
+  }
+
+  .stats-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .stats-value {
+    font-size: 0.6rem;
+    color: var(--text-faint);
+  }
+
+  .stats-summary {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    margin-bottom: 10px;
+  }
+
+  .stats-summary strong {
+    color: var(--gold);
+    font-size: 1.3rem;
+  }
+
+  /* Stats tabs */
+  .stats-tabs {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .stats-tab {
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .stats-tab.active {
+    background: rgba(212,168,71,0.12);
+    color: var(--gold);
+    border-color: rgba(212,168,71,0.3);
+  }
+
+  .stats-tab:hover {
+    color: var(--text-main);
+  }
+
+  /* Clear history button */
+  .stats-clear {
+    margin-top: 14px;
+    padding: 8px 0;
+    font-size: 0.7rem;
+    color: rgba(255,80,60,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-decoration: underline;
+  }
+
+  
+  /* Month picker dropdown */
+  .stats-month-picker {
+    position: relative;
+    display: inline-block;
+  }
+
+  .stats-month-picker .stats-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-right: 10px;
+  }
+
+  .month-arrow {
+    font-size: 0.6rem;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 0 0 2px;
+    line-height: 1;
+  }
+
+  .month-arrow:hover {
+    opacity: 1;
+    color: var(--gold);
+  }
+
+  .stats-month-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dialog-bg);
+    border: 1px solid rgba(212,168,71,0.15);
+    border-radius: 12px;
+    padding: 8px;
+    display: none;
+    z-index: 350;
+    min-width: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .stats-month-dropdown.show {
+    display: block;
+  }
+
+  .stats-month-option {
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    transition: all 0.15s ease;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .stats-month-option:hover {
+    background: rgba(212,168,71,0.1);
+    color: var(--text-main);
+  }
+
+  .stats-month-option.active {
+    background: rgba(212,168,71,0.15);
+    color: var(--gold);
+  }
+.stats-clear:hover {
+    color: rgba(255,80,60,0.8);
+  }
+.interval-option.selected {
     background: rgba(212, 168, 71, 0.15);
     border-color: rgba(212, 168, 71, 0.4);
     color: var(--gold);
@@ -555,6 +826,7 @@
 
   <!-- Theme toggle -->
   <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+  <button class="theme-toggle" id="statsToggle" title="功德统计" style="top:68px;">📊</button>
 
   <!-- Header -->
   <div class="header">
@@ -626,15 +898,15 @@
                    C 500 265, 430 270, 380 260 Z"
                 fill="url(#bodyGrad)"/>
 
+          <!-- Pectoral line (barely visible, decorative) -->
           <path d="M 320 410
                    C 420 450, 580 470, 740 445
                    C 800 435, 840 425, 860 415"
-                fill="none" stroke="rgba(42,12,4,0.6)" stroke-width="3.5" stroke-linecap="round"/>
+                fill="none" stroke="rgba(42,12,4,0.15)" stroke-width="2" stroke-linecap="round"/>
 
           <g class="slit-opening">
-            <ellipse cx="580" cy="245" rx="160" ry="9" fill="url(#slitInner)"/>
-            <ellipse cx="580" cy="240" rx="160" ry="2" fill="rgba(212,168,71,0.6)"/>
-            <ellipse cx="580" cy="250" rx="160" ry="2" fill="rgba(212,168,71,0.3)"/>
+            <path d="M 820 408 Q 855 418, 875 403" fill="none" stroke="#1a0802" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M 820 405 Q 855 415, 875 400" fill="none" stroke="rgba(212,168,71,0.4)" stroke-width="1" stroke-linecap="round"/>
           </g>
 
           <circle cx="830" cy="360" r="8" fill="#0a0402"/>
@@ -658,6 +930,15 @@
   </div>
 
   <!-- Footer -->
+  
+  <!-- Skin Selector -->
+  <div class="skin-group" id="skinGroup">
+    <div class="skin-dot classic active" data-skin="classic" title="经典红木"></div>
+    <div class="skin-dot gold" data-skin="gold" title="金漆"></div>
+    <div class="skin-dot jade" data-skin="jade" title="玉石"></div>
+    <div class="skin-dot panda" data-skin="panda" title="熊猫"></div>
+  </div>
+
   <div class="footer">
     <div class="hint">
       <span>点击木鱼</span>
@@ -668,7 +949,7 @@
       <button class="btn" id="muteBtn">音效：开</button>
       <button class="btn" id="autoBtn">自动敲击</button>
       <button class="btn" id="textBtn">文字：功德</button>
-      <button class="btn" id="resetBtn">重置功德</button>
+      <button class="btn" id="skinBtn">木鱼皮肤</button>
     </div>
   </div>
 
@@ -684,8 +965,8 @@
   <div class="dialog-overlay" id="dialogOverlay">
     <div class="dialog">
       <div class="dialog-icon">⚠️</div>
-      <div class="dialog-title">确认重置功德</div>
-      <div class="dialog-desc">当前功德 <strong id="dialogMeritCount">0</strong>，重置后将清零且不可恢复。</div>
+      <div class="dialog-title">确认操作</div>
+      <div class="dialog-desc">即将清空所有数据</div>
       <div class="dialog-actions">
         <button class="dialog-btn dialog-btn-cancel" id="dialogCancel">取消</button>
         <button class="dialog-btn dialog-btn-confirm" id="dialogConfirm">确认重置</button>
@@ -711,6 +992,31 @@
       </div>
     </div>
   </div>
+
+
+  <!-- Stats Dialog -->
+  <div class="dialog-overlay" id="statsDialogOverlay">
+    <div class="dialog" style="max-width:380px;">
+      <div class="dialog-icon">📊</div>
+      <div class="dialog-title">功德统计</div>
+      <div class="stats-tabs" id="statsTabs">
+        <button class="stats-tab active" data-tab="day">今日</button>
+        <button class="stats-tab" data-tab="week">本周</button>
+        
+        <div class="stats-month-picker" id="statsMonthPicker">
+          <button class="stats-tab active" id="statsMonthBtn"><span id="statsMonthLabel">本月</span><span class="month-arrow">▾</span></button>
+          <div class="stats-month-dropdown" id="statsMonthDropdown"></div>
+        </div>
+      </div>
+      <div class="stats-summary" id="statsSummary"></div>
+      <div class="stats-chart" id="statsChart"></div>
+      <button class="stats-clear" id="statsClear">清空所有数据</button>
+      <div class="dialog-actions" style="margin-top:8px;">
+        <button class="dialog-btn dialog-btn-confirm" id="statsDialogClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Text Customization Dialog -->
   <div class="dialog-overlay" id="textDialogOverlay">
@@ -742,7 +1048,6 @@
   const meritCountEl = document.getElementById('meritCount');
   const particlesEl = document.getElementById('particles');
   const muteBtn = document.getElementById('muteBtn');
-  const resetBtn = document.getElementById('resetBtn');
   const autoBtn = document.getElementById('autoBtn');
   const textBtn = document.getElementById('textBtn');
   const themeToggle = document.getElementById('themeToggle');
@@ -755,11 +1060,20 @@
   let autoTimer = null;
   let autoIntervalVal = 500;
   let customText = '功德';
+  let comboCount = 0;
+  let comboTimer = null;
+  let lastHitTime = 0;
+  let bestCombo = 0;
+  let currentSkin = 'classic';
+  let skinBtnVisible = false;
 
   const STORAGE_KEY = 'wooden_fish_merit';
   const SOUND_KEY = 'wooden_fish_sound';
   const TEXT_KEY = 'wooden_fish_text';
   const THEME_KEY = 'wooden_fish_theme';
+  const SKIN_KEY = 'wooden_fish_skin';
+  const COMBO_KEY = 'wooden_fish_bestcombo';
+  const DAILY_KEY = 'wooden_fish_daily';
 
   function loadState() {
     try {
@@ -767,6 +1081,9 @@
       soundEnabled = localStorage.getItem(SOUND_KEY) !== 'false';
       var savedText = localStorage.getItem(TEXT_KEY);
       if (savedText) customText = savedText;
+      var savedSkin = localStorage.getItem(SKIN_KEY);
+      if (savedSkin) currentSkin = savedSkin;
+      bestCombo = parseInt(localStorage.getItem(COMBO_KEY)) || 0;
       if (localStorage.getItem(THEME_KEY) === 'light') {
         document.body.classList.add('light-mode');
       }
@@ -877,7 +1194,15 @@
   function showMeritText(x, y) {
     var text = document.createElement('div');
     text.className = 'merit-text';
-    text.textContent = customText + ' +1';
+
+    // Show combo if >= 2
+    if (comboCount >= 2) {
+      text.textContent = customText + ' +1 x' + comboCount;
+      var sz = Math.min(1.4 + comboCount * 0.15, 2.8);
+      text.style.fontSize = sz + 'rem';
+    } else {
+      text.textContent = customText + ' +1';
+    }
 
     // Pick next color in rotation
     var c = meritColors[colorIndex % meritColors.length];
@@ -894,6 +1219,59 @@
     setTimeout(function() { text.remove(); }, 1600);
   }
 
+  // Show combo break text
+  function showComboBreak() {
+    if (comboCount < 5) return;
+    var div = document.createElement('div');
+    div.className = 'combo-text';
+    div.textContent = comboCount + '连击!';
+    var sz = Math.min(2 + comboCount * 0.3, 5);
+    div.style.fontSize = sz + 'rem';
+    div.style.color = '#f0c860';
+    div.style.textShadow = '0 0 30px rgba(240,200,96,0.8)';
+    document.body.appendChild(div);
+    setTimeout(function() { div.remove(); }, 1000);
+  }
+
+  // Celebration effects
+  function showCelebration(score) {
+    var overlay = document.createElement('div');
+    overlay.className = 'celebrate-overlay';
+    var text = document.createElement('div');
+    text.className = 'celebrate-text';
+    text.textContent = '功德 ' + score.toLocaleString() + '!';
+    overlay.appendChild(text);
+    document.body.appendChild(overlay);
+
+    // Confetti burst from center
+    var colors = ['#f0c860', '#e87a5a', '#e8a87c', '#f0d89a', '#d4a847', '#ff6b4a', '#3aa0a0', '#9a7ac0'];
+    for (var i = 0; i < 80; i++) {
+      var particle = document.createElement('div');
+      particle.className = 'confetti';
+      particle.style.left = '50%';
+      particle.style.top = '50%';
+      var w = (5 + Math.random() * 10) + 'px';
+      particle.style.width = w;
+      particle.style.height = w;
+      particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+      // Random burst direction
+      var angle = Math.random() * Math.PI * 2;
+      var dist = 150 + Math.random() * 400;
+      var tx = Math.cos(angle) * dist + 'px';
+      var ty = Math.sin(angle) * dist + 'px';
+      particle.style.setProperty('--tx', tx);
+      particle.style.setProperty('--ty', ty);
+
+      particle.style.animationDelay = Math.random() * 0.3 + 's';
+      particle.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+      overlay.appendChild(particle);
+    }
+
+    setTimeout(function() { overlay.remove(); }, 3000);
+  }
+
   function showRipple(x, y) {
     const ripple = document.createElement('div');
     ripple.className = 'ripple';
@@ -905,15 +1283,48 @@
 
   function hitFish(centerX, centerY) {
     merit++;
+    saveDailyData();
     updateDisplay();
     saveMerit();
 
+    // Combo tracking
+    var now = Date.now();
+    if (now - lastHitTime < 500) {
+      comboCount++;
+    } else {
+      if (comboCount > bestCombo) {
+        bestCombo = comboCount;
+        try { localStorage.setItem(COMBO_KEY, String(bestCombo)); } catch(e) {}
+      }
+      showComboBreak();
+      comboCount = 1;
+    }
+    lastHitTime = now;
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(function() {
+      if (comboCount > bestCombo) {
+        bestCombo = comboCount;
+        try { localStorage.setItem(COMBO_KEY, String(bestCombo)); } catch(e) {}
+      }
+      showComboBreak();
+      comboCount = 0;
+    }, 500);
+
+    // Milestone celebration
+    var milestones = [100, 500, 1000, 10000];
+    for (var i = 0; i < milestones.length; i++) {
+      if (merit === milestones[i]) {
+        showCelebration(merit);
+        break;
+      }
+    }
+
     // Force re-trigger animation on rapid clicks
     fishContainer.classList.remove('hit');
-    void fishContainer.offsetWidth; // force reflow
+    void fishContainer.offsetWidth;
     fishContainer.classList.add('hit');
     clearTimeout(hitTimeout);
-    hitTimeout = setTimeout(() => fishContainer.classList.remove('hit'), 180);
+    hitTimeout = setTimeout(() => fishContainer.classList.remove('hit'), 260);
 
     showMeritText(centerX, centerY);
     showRipple(centerX, centerY);
@@ -948,7 +1359,7 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === ' ') {
-      if (dialogOverlay.classList.contains('show') || autoDialogOverlay.classList.contains('show') || textDialogOverlay.classList.contains('show')) return;
+      if (dialogOverlay.classList.contains('show') || autoDialogOverlay.classList.contains('show') || textDialogOverlay.classList.contains('show') || statsDialogOverlay.classList.contains('show')) return;
       e.preventDefault();
       hitFromCenter();
     }
@@ -956,7 +1367,410 @@
       if (dialogOverlay.classList.contains('show')) dialogOverlay.classList.remove('show');
       if (autoDialogOverlay.classList.contains('show')) autoDialogOverlay.classList.remove('show');
       if (textDialogOverlay.classList.contains('show')) textDialogOverlay.classList.remove('show');
+      if (statsDialogOverlay.classList.contains('show')) statsDialogOverlay.classList.remove('show');
     }
+  });
+
+
+  // --- Skin switching ---
+  var skinBtn = document.getElementById('skinBtn');
+  var skinGroup = document.getElementById('skinGroup');
+  var skinDots = skinGroup.querySelectorAll('.skin-dot');
+  var woodenFishEl = document.getElementById('woodenFish');
+
+  // Skin color maps for SVG gradients
+  var skinColors = {
+    classic: { top: '#e8875a', mid: '#b8502a', low: '#6a2810', dark: '#2a0c04' },
+    gold:    { top: '#f0c860', mid: '#c8a040', low: '#8b6914', dark: '#3a2804' },
+    jade:    { top: '#8ac8a0', mid: '#4a9860', low: '#2a6040', dark: '#0a2010' },
+    panda:   { top: '#a0a0a0', mid: '#606060', low: '#303030', dark: '#0a0a0a' }
+  };
+
+  function applySkin(skin) {
+    currentSkin = skin;
+    var c = skinColors[skin];
+    var svg = woodenFishEl.querySelector('svg');
+    if (!svg) return;
+
+    var ns = 'http://www.w3.org/2000/svg';
+
+    // Update bodyGrad
+    var bodyGrad = svg.querySelector('#bodyGrad');
+    if (bodyGrad) {
+      while (bodyGrad.firstChild) bodyGrad.removeChild(bodyGrad.firstChild);
+      var stops = [
+        { offset: '0%', color: c.top },
+        { offset: '35%', color: c.mid },
+        { offset: '75%', color: c.low },
+        { offset: '100%', color: c.dark }
+      ];
+      stops.forEach(function(s) {
+        var stop = document.createElementNS(ns, 'stop');
+        stop.setAttribute('offset', s.offset);
+        stop.setAttribute('stop-color', s.color);
+        bodyGrad.appendChild(stop);
+      });
+    }
+
+    // Update tailGrad
+    var tailGrad = svg.querySelector('#tailGrad');
+    if (tailGrad) {
+      while (tailGrad.firstChild) tailGrad.removeChild(tailGrad.firstChild);
+      var tailStops = [
+        { offset: '0%', color: c.top },
+        { offset: '50%', color: c.mid },
+        { offset: '100%', color: c.dark }
+      ];
+      tailStops.forEach(function(s) {
+        var stop = document.createElementNS(ns, 'stop');
+        stop.setAttribute('offset', s.offset);
+        stop.setAttribute('stop-color', s.color);
+        tailGrad.appendChild(stop);
+      });
+    }
+
+    try { localStorage.setItem(SKIN_KEY, skin); } catch(e) {}
+
+    skinDots.forEach(function(d) {
+      d.classList.toggle('active', d.getAttribute('data-skin') === skin);
+    });
+  }
+
+  // Remove unused function
+  function updateSVGGradients() {}
+
+  skinBtn.addEventListener('click', function() {
+    skinGroup.classList.toggle('show');
+    skinBtn.classList.toggle('active', skinGroup.classList.contains('show'));
+  });
+
+  skinDots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      applySkin(dot.getAttribute('data-skin'));
+    });
+  });
+
+  // Apply initial skin
+  applySkin(currentSkin);
+
+
+  // --- Daily stats ---
+  function getDailyData() {
+    try {
+      return JSON.parse(localStorage.getItem(DAILY_KEY)) || {};
+    } catch(e) { return {}; }
+  }
+
+  function saveDailyData() {
+    var data = getDailyData();
+    var today = new Date().toISOString().split('T')[0];
+    data[today] = (data[today] || 0) + 1;
+
+    // Auto-clean data older than 90 days
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    var cutoffStr = cutoff.toISOString().split('T')[0];
+    var cleaned = {};
+    Object.keys(data).forEach(function(k) {
+      if (k >= cutoffStr) cleaned[k] = data[k];
+    });
+
+    try { localStorage.setItem(DAILY_KEY, JSON.stringify(cleaned)); } catch(e) {}
+  }
+
+  function getWeekRange() {
+    var now = new Date();
+    var day = now.getDay() || 7;
+    var mon = new Date(now);
+    mon.setDate(now.getDate() - day + 1);
+    var days = [];
+    var labels = ['一','二','三','四','五','六','日'];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(mon);
+      d.setDate(mon.getDate() + i);
+      days.push({ date: d.toISOString().split('T')[0], label: labels[i] });
+    }
+    return days;
+  }
+
+  function getMonthDays() {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth();
+    var lastDay = new Date(year, month + 1, 0).getDate();
+    var days = [];
+    for (var i = 1; i <= lastDay; i++) {
+      var ds = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
+      days.push({ date: ds, label: String(i) });
+    }
+    return days;
+  }
+
+  // --- Stats UI ---
+  var statsDialogOverlay = document.getElementById('statsDialogOverlay');
+  var statsToggleBtn = document.getElementById('statsToggle');
+  var statsTabs = document.getElementById('statsTabs');
+  var statsChart = document.getElementById('statsChart');
+  var statsSummary = document.getElementById('statsSummary');
+  var statsClearBtn = document.getElementById('statsClear');
+  var statsCloseBtn = document.getElementById('statsDialogClose');
+
+  var currentStatsTab = 'day';
+
+  function renderStats() {
+    var data = getDailyData();
+    var today = new Date().toISOString().split('T')[0];
+    var html = '';
+    var total = 0;
+    var maxVal = 1;
+
+    if (currentStatsTab === 'day') {
+      statsChart.style.display = 'flex';
+      statsChart.style.alignItems = 'center';
+      statsChart.style.justifyContent = 'center';
+      var val = data[today] || 0;
+      var yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      var yestVal = data[yesterday.toISOString().split('T')[0]] || 0;
+      var diff = val - yestVal;
+      var diffStr = diff >= 0 ? '↑' + diff : '↓' + Math.abs(diff);
+      statsSummary.innerHTML = '较昨日 <strong style="color:' + (diff >= 0 ? 'var(--gold)' : '#ff6b4a') + ';">' + diffStr + '</strong>';
+      html = '<div style="text-align:center;font-size:3rem;font-weight:700;color:var(--gold);">' + val + '</div>';
+    } else if (currentStatsTab === 'week') {
+      statsChart.style.display = 'flex';
+      statsChart.style.alignItems = 'flex-end';
+      var weekDays = getWeekRange();
+      weekDays.forEach(function(d) {
+        var v = data[d.date] || 0;
+        total += v;
+        if (v > maxVal) maxVal = v;
+      });
+      maxVal = Math.max(maxVal, 5);
+      statsSummary.innerHTML = '本周合计 <strong>' + total + '</strong>';
+      html = '';
+      weekDays.forEach(function(d) {
+        var v = data[d.date] || 0;
+        var barH = Math.max(Math.min((v / maxVal) * 140, 140), v > 0 ? 6 : 0);
+        var isToday = d.date === today;
+        html += '<div class="stats-bar-wrap"><div class="stats-bar' + (isToday ? ' today' : '') + '" style="height:' + barH + 'px;"></div><div class="stats-label">' + d.label + '</div><div class="stats-value">' + v + '</div></div>';
+      });
+    } else if (currentStatsTab === 'month') {
+      // Override chart display for calendar grid
+      statsChart.style.display = 'block';
+      statsChart.style.gap = '0';
+      var now = new Date();
+      var year = selectedYear !== null ? selectedYear : now.getFullYear();
+      var month = selectedMonth !== null ? (selectedMonth - 1) : now.getMonth();
+      var lastDay = new Date(year, month + 1, 0).getDate();
+      // Get first day of month weekday (0=Sun, 1=Mon...6=Sat)
+      var firstWeekday = new Date(year, month, 1).getDay();
+      if (firstWeekday === 0) firstWeekday = 7; // Make Monday=1...Sunday=7
+
+      // Header row: weekdays
+      var dayHeaders = ['一','二','三','四','五','六','日'];
+      html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:4px;">';
+      dayHeaders.forEach(function(h) {
+        html += '<div style="font-size:0.6rem;color:var(--text-faint);padding:2px 0;">' + h + '</div>';
+      });
+      html += '</div>';
+
+      // Calendar grid
+      html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;">';
+
+      // Empty cells before first day
+      for (var i = 1; i < firstWeekday; i++) {
+        html += '<div></div>';
+      }
+
+      // Day cells
+      for (var d = 1; d <= lastDay; d++) {
+        var ds = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        var v = data[ds] || 0;
+        total += v;
+        var isToday = ds === today;
+        var bgOpacity = v > 0 ? Math.min(0.1 + (v / 100) * 0.5, 0.6) : 0;
+        var bg = v > 0 ? 'rgba(212,168,71,' + bgOpacity + ')' : 'transparent';
+        if (isToday) bg = 'rgba(240,200,96,0.4)';
+        html += '<div style="position:relative;padding:4px 2px;border-radius:4px;background:' + bg + ';' + (isToday ? 'border:1px solid rgba(240,200,96,0.5);' : '') + '">';
+        html += '<div style="font-size:0.7rem;color:' + (isToday ? 'var(--gold-bright)' : 'var(--text-dim)') + ';">' + d + '</div>';
+        html += '<div style="font-size:0.55rem;color:' + (v > 0 ? 'var(--gold)' : 'var(--text-faint)') + ';">' + (v > 0 ? v : '') + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+
+      statsSummary.innerHTML = '本月合计 <strong>' + total + '</strong>  ·  日均 ' + Math.round(total / lastDay);
+      statsChart.innerHTML = html;
+      return;
+    }
+
+    statsChart.innerHTML = html;
+  }
+
+  statsToggleBtn.addEventListener('click', function() {
+    currentStatsTab = 'day';
+    selectedMonth = null;
+    selectedYear = null;
+    statsMonthLabel.textContent = '本月';
+    statsTabs.querySelectorAll('.stats-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === 'day');
+    });
+    renderStats();
+    statsDialogOverlay.classList.add('show');
+  });
+
+  // Month picker logic
+  var statsMonthBtn = document.getElementById('statsMonthBtn');
+  var statsMonthLabel = document.getElementById('statsMonthLabel');
+  var statsMonthPicker = document.getElementById('statsMonthPicker');
+  var statsMonthDropdown = document.getElementById('statsMonthDropdown');
+  var selectedYear = null;
+  var selectedMonth = null; // null = current month
+
+  function getAvailableMonths() {
+    var months = [];
+    var now = new Date();
+    // Always show last 3 months (current + previous 2)
+    for (var i = 0; i < 3; i++) {
+      var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+    }
+    return months;
+  }
+
+  function isCurrentMonth(y, m) {
+    var now = new Date();
+    return y === now.getFullYear() && m === (now.getMonth() + 1);
+  }
+
+  function buildMonthDropdown() {
+    var months = getAvailableMonths();
+    statsMonthDropdown.innerHTML = '';
+    months.forEach(function(m) {
+      var parts = m.split('-');
+      var yr = parseInt(parts[0]);
+      var mn = parseInt(parts[1]);
+      var label = parts[0] + '年' + mn + '月';
+      var opt = document.createElement('div');
+      opt.className = 'stats-month-option';
+      if (selectedMonth === null && isCurrentMonth(yr, mn)) {
+        opt.classList.add('active');
+      } else if (selectedMonth !== null && yr === selectedYear && mn === selectedMonth) {
+        opt.classList.add('active');
+      }
+      opt.textContent = label;
+      opt.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectedYear = yr;
+        selectedMonth = mn;
+        statsMonthLabel.textContent = isCurrentMonth(yr, mn) ? '本月' : label;
+        currentStatsTab = 'month';
+        statsTabs.querySelectorAll('.stats-tab').forEach(function(t) { t.classList.remove('active'); });
+        statsMonthBtn.classList.add('active');
+        statsMonthDropdown.classList.remove('show');
+        renderStats();
+      });
+      statsMonthDropdown.appendChild(opt);
+    });
+  }
+
+  statsMonthBtn.addEventListener('click', function(e) {
+    if (e.target.closest('.month-arrow')) {
+      e.stopPropagation();
+      buildMonthDropdown();
+      statsMonthDropdown.classList.toggle('show');
+      return;
+    }
+    // Direct click on button text → switch to month tab, preserving current selection
+    // If currently on day/week tab, show current month; if already on month, keep whatever is selected
+    if (currentStatsTab !== 'month') {
+      selectedMonth = null;
+      selectedYear = null;
+      statsMonthLabel.textContent = '本月';
+    }
+    currentStatsTab = 'month';
+    statsTabs.querySelectorAll('.stats-tab').forEach(function(t) { t.classList.remove('active'); });
+    statsMonthBtn.classList.add('active');
+    renderStats();
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function() {
+    statsMonthDropdown.classList.remove('show');
+  });
+
+  // Existing tab clicks (日, 周)
+  statsTabs.querySelectorAll('.stats-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      if (tab.id === 'statsMonthBtn') return; // handled above
+      currentStatsTab = tab.getAttribute('data-tab');
+      statsTabs.querySelectorAll('.stats-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      selectedMonth = null;
+      selectedYear = null;
+      statsMonthLabel.textContent = '本月';
+      renderStats();
+    });
+  });
+
+  statsCloseBtn.addEventListener('click', function() {
+    statsDialogOverlay.classList.remove('show');
+  });
+
+  statsDialogOverlay.addEventListener('click', function(e) {
+    if (e.target === statsDialogOverlay) {
+      statsDialogOverlay.classList.remove('show');
+    }
+  });
+
+  statsClearBtn.addEventListener('click', function() {
+    var oldTitle = document.querySelector('.dialog-title');
+    var oldDesc = document.querySelector('.dialog-desc');
+    var oldIcon = document.querySelector('.dialog-icon');
+    var origTitle = oldTitle.textContent;
+    var origDesc = oldDesc.textContent;
+    var origIcon = oldIcon.textContent;
+
+    oldIcon.textContent = '🗑️';
+    oldTitle.textContent = '清空所有数据';
+    oldDesc.innerHTML = '将清空<strong>功德总数</strong>和<strong>统计记录</strong>，所有数据归零，不可撤销。';
+    dialogCancel.textContent = '取消';
+    dialogConfirm.textContent = '确认清空';
+
+    var origHandler = dialogConfirm.onclick;
+    statsDialogOverlay.classList.remove('show');
+    dialogOverlay.classList.add('show');
+
+    dialogConfirm.onclick = function() {
+      // Clear everything
+      merit = 0;
+      updateDisplay();
+      saveMerit();
+      try { localStorage.removeItem(DAILY_KEY); } catch(e) {}
+      // Reset combo too
+      comboCount = 0;
+      bestCombo = 0;
+      try { localStorage.removeItem(COMBO_KEY); } catch(e) {}
+
+      oldIcon.textContent = origIcon;
+      oldTitle.textContent = origTitle;
+      oldDesc.innerHTML = origDesc;
+      dialogCancel.textContent = '取消';
+      dialogConfirm.textContent = '确认重置';
+      dialogConfirm.onclick = origHandler;
+      dialogOverlay.classList.remove('show');
+      showToast('所有数据已清空');
+    };
+
+    var origCancelHandler = dialogCancel.onclick;
+    dialogCancel.onclick = function() {
+      oldIcon.textContent = origIcon;
+      oldTitle.textContent = origTitle;
+      oldDesc.innerHTML = origDesc;
+      dialogCancel.textContent = '取消';
+      dialogConfirm.textContent = '确认重置';
+      dialogConfirm.onclick = origHandler;
+      dialogCancel.onclick = origCancelHandler;
+    };
   });
 
   // Theme toggle
@@ -1111,12 +1925,7 @@
   var dialogCancel = document.getElementById('dialogCancel');
   var dialogConfirm = document.getElementById('dialogConfirm');
 
-  resetBtn.addEventListener('click', function() {
-    if (merit === 0) { showToast('当前功德已为零'); return; }
-    dialogMeritCount.textContent = merit.toLocaleString();
-    dialogOverlay.classList.add('show');
-  });
-
+  // Dialog overlay (used by stats clear confirmation)
   dialogCancel.addEventListener('click', function() {
     dialogOverlay.classList.remove('show');
   });
@@ -1125,15 +1934,6 @@
     if (e.target === dialogOverlay) {
       dialogOverlay.classList.remove('show');
     }
-  });
-
-  dialogConfirm.addEventListener('click', function() {
-    var prev = merit;
-    merit = 0;
-    updateDisplay();
-    saveMerit();
-    dialogOverlay.classList.remove('show');
-    showToast('已重置功德（之前：' + prev.toLocaleString() + '）');
   });
 
   let toastTimeout = null;

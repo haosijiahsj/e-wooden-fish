@@ -945,6 +945,12 @@
     border-color: rgba(212, 168, 71, 0.2);
   }
 
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .btn:active {
     transform: scale(0.95);
   }
@@ -1961,6 +1967,14 @@
   }
 
   function startBreathing() {
+    // Stop auto if running — mutually exclusive
+    if (autoActive) {
+      autoActive = false;
+      autoBtn.textContent = '自动敲击';
+      autoBtn.classList.remove('active');
+      stopAutoKnock();
+    }
+    autoBtn.disabled = true;
     breatheActive = true;
     breatheRound = 0;
     breathRing.style.display = 'block';
@@ -1985,6 +1999,7 @@
     meditationCounter.classList.remove('visible');
     breatheBtn.textContent = '🧘 禅修';
     breatheBtn.classList.remove('active');
+    autoBtn.disabled = false;
     var completed = breatheRound;
     if (completed > 0) {
       totalRounds += completed;
@@ -2726,6 +2741,7 @@
       autoActive = false;
       autoBtn.textContent = '自动敲击';
       autoBtn.classList.remove('active');
+      breatheBtn.disabled = false;
       stopAutoKnock();
       showToast('自动敲击已关闭');
     } else {
@@ -2748,6 +2764,21 @@
 
   // Dialog: start
   autoDialogStart.addEventListener('click', function() {
+    // Stop breathing if running — mutually exclusive
+    if (breatheActive) {
+      breatheActive = false;
+      clearTimeout(breatheTimer);
+      if (breatheFrameId) cancelAnimationFrame(breatheFrameId);
+      breathRing.style.display = 'none';
+      breathPhase.style.display = 'none';
+      breathHint.classList.remove('show');
+      breathRing.className = 'breath-ring';
+      breathPhase.className = 'breath-phase';
+      meditationCounter.classList.remove('visible');
+      breatheBtn.textContent = '🧘 禅修';
+      breatheBtn.classList.remove('active');
+    }
+    breatheBtn.disabled = true;
     autoActive = true;
     autoBtn.textContent = '停止自动';
     autoBtn.classList.add('active');

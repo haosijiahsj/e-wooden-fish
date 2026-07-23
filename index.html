@@ -192,10 +192,10 @@
   }
 
   @keyframes zenFloat {
-    0% { opacity: 0; transform: translateY(10px); }
-    20% { opacity: 0.6; }
-    60% { opacity: 0.6; transform: translateY(-30px); }
-    100% { opacity: 0; transform: translateY(-60px); }
+    0% { opacity: 0; transform: translate(-50%, -8px); }
+    15% { opacity: 0.65; }
+    65% { opacity: 0.65; transform: translate(-50%, 6px); }
+    100% { opacity: 0; transform: translate(-50%, 16px); }
   }
 
   /* Achievement banner */
@@ -1790,15 +1790,16 @@
       }
     }
 
-    // Zen quote (10% chance) — follows merit text path after delay
+    // Zen quote (10% chance) — appears just below the wooden fish
     if (Math.random() < 0.1) {
-      var qx = centerX, qy = centerY;
+      var fishRect = document.getElementById('woodenFish').getBoundingClientRect();
+      var qx = fishRect.left + fishRect.width / 2;
+      var qy = fishRect.bottom + 12;
       var quote = document.createElement('div');
       quote.className = 'zen-quote';
       quote.textContent = '「' + zenQuotes[Math.floor(Math.random() * zenQuotes.length)] + '」';
-      var qOffsetX = (Math.random() - 0.5) * 40;
-      quote.style.left = (qx + qOffsetX) + 'px';
-      quote.style.top = (qy + 20) + 'px';
+      quote.style.left = qx + 'px';
+      quote.style.top = qy + 'px';
       document.body.appendChild(quote);
       setTimeout(function() { quote.remove(); }, 3000);
     }

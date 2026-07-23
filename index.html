@@ -141,7 +141,7 @@
   }
 
   .merit-label {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: var(--text-dim);
     letter-spacing: 0.4em;
     font-weight: 300;
@@ -159,10 +159,11 @@
 
   
   .merit-title {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: var(--gold);
-    letter-spacing: 0.25em;
-    opacity: 0.7;
+    letter-spacing: 0.2em;
+    font-weight: 400;
+    opacity: 0.75;
     transition: all 0.4s ease;
   }
 
@@ -366,6 +367,23 @@
   .breath-phase.inhale { color: rgba(120,200,180,0.9); }
   .breath-phase.hold { color: rgba(212,168,71,0.9); }
   .breath-phase.exhale { color: rgba(232,120,90,0.9); }
+
+  /* Breathing hint (subtitle under exhale) */
+  .breath-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 22px);
+    font-size: 0.7rem;
+    color: rgba(232,120,90,0.5);
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .breath-hint.show { opacity: 1; }
 
   /* Meditation round counter */
   .meditation-counter {
@@ -1107,7 +1125,7 @@
     <div class="merit-display">
       <span class="merit-label">功 德</span>
       <span class="merit-count" id="meritCount">0</span>
-      <span class="merit-title" id="meritTitle">沙弥</span>
+      <span class="merit-title" id="meritTitle">🔰 沙弥</span>
     </div>
   </div>
 
@@ -1121,6 +1139,7 @@
   <div class="fish-container" id="fishContainer">
     <div class="breath-ring" id="breathRing"></div>
     <div class="breath-phase" id="breathPhase"></div>
+    <div class="breath-hint" id="breathHint"></div>
     <div class="meditation-counter" id="meditationCounter"></div>
     <div class="fish-aura"></div>
     <div class="wooden-fish" id="woodenFish">
@@ -1448,21 +1467,25 @@
 
   // Level titles
   var levels = [
-    { min: 0,     title: '沙弥' },
-    { min: 200,   title: '比丘' },
-    { min: 600,   title: '行者' },
-    { min: 1800,  title: '罗汉' },
-    { min: 5000,  title: '尊者' },
-    { min: 15000, title: '菩萨' },
-    { min: 50000, title: '佛' }
+    { min: 0,     title: '沙弥', icon: '🔰' },
+    { min: 200,   title: '比丘', icon: '📿' },
+    { min: 600,   title: '行者', icon: '🚶' },
+    { min: 1800,  title: '罗汉', icon: '🛡️' },
+    { min: 5000,  title: '尊者', icon: '👑' },
+    { min: 15000, title: '菩萨', icon: '🌸' },
+    { min: 50000, title: '佛',   icon: '☸️' }
   ];
 
-  function getTitle(score) {
-    var title = '沙弥';
+  function getTitleInfo(score) {
+    var info = { title: '沙弥', icon: '🔰' };
     for (var i = levels.length - 1; i >= 0; i--) {
-      if (score >= levels[i].min) { title = levels[i].title; break; }
+      if (score >= levels[i].min) { info = levels[i]; break; }
     }
-    return title;
+    return info;
+  }
+
+  function getTitle(score) {
+    return getTitleInfo(score).title;
   }
 
   function getReachedTitles() {
@@ -1478,22 +1501,22 @@
   }
 
   function checkTitlePromotion() {
-    var currentTitle = getTitle(merit);
+    var info = getTitleInfo(merit);
     var titleEl = document.getElementById('meritTitle');
     if (!titleEl) return;
-    titleEl.textContent = currentTitle;
+    titleEl.textContent = info.icon + ' ' + info.title;
 
     var reached = getReachedTitles();
-    if (reached.indexOf(currentTitle) === -1) {
-      saveReachedTitle(currentTitle);
+    if (reached.indexOf(info.title) === -1) {
+      saveReachedTitle(info.title);
       // Big celebration for level up
-      if (currentTitle !== '沙弥') {
+      if (info.title !== '沙弥') {
         showCelebration(merit);
         var overlay = document.querySelector('.celebrate-overlay');
         if (overlay) {
           var extra = document.createElement('div');
           extra.style.cssText = 'position:fixed;top:40%;left:50%;transform:translateX(-50%);font-size:1.6rem;color:#f0c860;z-index:302;text-shadow:0 0 30px rgba(240,200,96,0.6);pointer-events:none;animation:celebrateIn 0.6s cubic-bezier(0.17,0.67,0.35,1.2) forwards,celebrateOut 0.5s 2.5s ease-in forwards;';
-          extra.textContent = '晋升：' + currentTitle;
+          extra.textContent = '晋升：' + info.icon + ' ' + info.title;
           overlay.appendChild(extra);
         }
       }
@@ -1706,6 +1729,13 @@
   }
 
   function hitFish(centerX, centerY) {
+    // Breathing mode round tracking: only count first tap per exhale
+    if (breatheActive && breathePhaseName === 'exhale' && !breatheRoundCounted) {
+      breatheRound++;
+      breatheRoundCounted = true;
+      meditationCounter.textContent = '第 ' + breatheRound + ' 轮';
+    }
+
     // Daily double check
     var isDailyFirst = checkDailyDouble();
     var addAmount = 1;
@@ -1848,6 +1878,7 @@
   var breatheTimer = null;
   var breathePhaseName = ''; // 'inhale', 'hold', 'exhale'
   var breatheRound = 0;
+  var breatheRoundCounted = false;
   var totalRounds = 0;
   var breatheSettings = { inhale: 4, hold: 2, exhale: 4 };
   var breathePreset = '4-2-4';
@@ -1896,13 +1927,17 @@
 
     if (phase === 'inhale') {
       breathPhase.textContent = '吸';
-      breatheRound++;
-      meditationCounter.textContent = '第 ' + breatheRound + ' 轮';
+      breathHint.classList.remove('show');
+      breatheRoundCounted = false;
+      meditationCounter.textContent = '第 ' + (breatheRound + 1) + ' 轮';
       meditationCounter.classList.add('visible');
     } else if (phase === 'hold') {
       breathPhase.textContent = '屏';
+      breathHint.classList.remove('show');
     } else if (phase === 'exhale') {
-      breathPhase.textContent = '敲';
+      breathPhase.textContent = '呼';
+      breathHint.textContent = '轻敲木鱼';
+      breathHint.classList.add('show');
     }
 
     // Schedule next phase
@@ -1944,12 +1979,13 @@
     breatheFrameId = null;
     breathRing.style.display = 'none';
     breathPhase.style.display = 'none';
+    breathHint.classList.remove('show');
     breathRing.className = 'breath-ring';
     breathPhase.className = 'breath-phase';
     meditationCounter.classList.remove('visible');
     breatheBtn.textContent = '🧘 禅修';
     breatheBtn.classList.remove('active');
-    var completed = breatheRound - (breathePhaseName === 'inhale' ? 1 : 0);
+    var completed = breatheRound;
     if (completed > 0) {
       totalRounds += completed;
       saveMeditation();
@@ -1962,12 +1998,11 @@
     if (!breatheActive) return false;
     if (breathePhaseName !== 'exhale') {
       // Too early - gentle nudge
-      if (breathPhase.textContent !== '敲') {
-        breathPhase.style.transform = 'translate(-50%, -50%) scale(0.8)';
-        setTimeout(function() {
-          breathPhase.style.transform = 'translate(-50%, -50%) scale(1)';
-        }, 150);
-      }
+      // Wrong phase — nudge indicator
+      breathPhase.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      setTimeout(function() {
+        breathPhase.style.transform = 'translate(-50%, -50%) scale(1)';
+      }, 150);
       return true; // consumed click
     }
     // Successful hit during exhale
